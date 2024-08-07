@@ -2,346 +2,114 @@
 layout: default
 refactor: true
 ---
-<!-- ![西部点子王](/assets/image/dutch.png) -->
-<img
-  src="{{ site.img_cdn }}/assets/image/dutch.png"
-  alt="西部点子王"
-  style="clip-path: inset(0% 0% 0% 0%); width: 100%; max-width: 100%; position: relative; left: 0%; margin-top: 0%;"
->
-<style>
-  details summary a:hover,
-  details div a:hover {
-    color: #da532c; /* 淡红色 */
-    text-decoration: underline; /* 添加下划线 */
-  }
-</style>
 
-<button id="toggleButton" onclick="toggleDetails()">折叠所有小分页</button>
+{% include lang.html %}
 
-<h1 id="aigc-相关">🧐<strong>AIGC 相关</strong>🧐</h1>
+{% assign pinned = site.posts | where: 'pin', 'true' %}
+{% assign default = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
 
-<details>
-  <summary><b>1. 吴恩达Prompt工程指南</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. ✅
-    <a href="https://winxuan.github.io/posts/chatgpt-clear-specific/" target="_blank"
-      >写好ChatGPT提示词之:清晰且具体(clear &amp; specific)</a
-    >
-    <br>
-    2. ✅
-    <a href="https://winxuan.github.io/posts/chatgpt-more-think/" target="_blank"
-      >写好ChatGPT提示词之:消耗更多步骤(算力换准确度)</a
-    >
-    <br>
-    3. ✅
-    <a href="https://winxuan.github.io/posts/chatgpt-Iterate/" target="_blank"
-      >写好ChatGPT提示词之:prompt的迭代(Iterate)</a
-    >
-    <br>
-    4. 写好ChatGPT提示词之:文本概括(Summarizing) <br>
-    5. 写好ChatGPT提示词之:文本推断(Inferring) <br>
-    6. 写好ChatGPT提示词之:文本转换(Transforming) <br>
-    7. 写好ChatGPT提示词之:文本扩展(Expanding) <br>
-    8. 写好ChatGPT提示词之:聊天机器人(Chatbot) <br>
-    参考资料:https://xiniushu.com/
-  </div>
-</details>
+{% assign posts = '' | split: '' %}
 
-<details open="">
-  <summary><b>2. GPT基本工具</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. ✅ <a href="https://winxuan.github.io/posts/gpt-api/" target="_blank">如何调用GPT API(python)</a> <br>
-    2. ✅
-    <a href="https://winxuan.github.io/posts/gpt-api-function-call/" target="_blank"
-      >GPT API 调用本地函数(function call)</a
-    >
-    <br>
-    3. 🔜
-    <a href="https://winxuan.github.io/posts/introduction-ai-programming/" target="_blank"
-      >面向AI框架编程--引言&amp;简介</a
-    >
-    <br>
-    4. LangChain <br>
-    5. Dify <br>
-  </div>
-</details>
+<!-- Get pinned posts -->
 
-<details open="">
-  <summary><b>3. 套壳ChatGPT</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. ✅
-    <a href="https://winxuan.github.io/posts/chatgpt-azure-openai-preface" target="_blank">套壳ChatGPT系列--写在前面</a>
-    <br>
-    2. Azure OpenAI 申请与模型部署相关 <br>
-    3. ✅
-    <a href="https://winxuan.github.io/posts/azure-openai-content-stream-processing/" target="_blank"
-      >Azure OpenAI生成内容流式输出(配置打字机效果)</a
-    >
-    <br>
-    4. ✅
-    <a href="https://winxuan.github.io/posts/azure-api-cfg-auto-demo/" target="_blank"
-      >Azure管理用API设置与自动化脚本demo</a
-    >
-    <br>
-    5. ✅ <a href="https://winxuan.github.io/posts/casing-chatgpt-research/" target="_blank">套壳ChatGPT项目调研</a>
-    <br>
-    6. ✅
-    <a href="https://winxuan.github.io/posts/chatgpt-next-web-usage-config-record/" target="_blank"
-      >ChatGPT-Next-Web--客户端+Azure使用配置部署</a
-    >
-    <br>
-    7. ChatGPT-Next-Web--网页版+Azure使用配置部署 <br>
-    8. ✅
-    <a href="https://winxuan.github.io/posts/libre-chat-usage-config-record/" target="_blank"
-      >LibreChat--多平台安装和基础配置</a
-    >
-    <br>
-    9. 🔜
-    <a href="https://winxuan.github.io/posts/libre-chat-wallet-points-system/" target="_blank"
-      >LibreChat--钱包积分系统(控制用户tokens使用量)</a
-    >
-    <br>
-  </div>
-</details>
+{% assign offset = paginator.page | minus: 1 | times: paginator.per_page %}
+{% assign pinned_num = pinned.size | minus: offset %}
 
-<details open="">
-  <summary><b>4. 大模型本地部署</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. ✅
-    <a href="https://winxuan.github.io/posts/multi-platform-Install-ollama/" target="_blank">多平台安装与配置ollama</a>
-    <br>
-  </div>
-</details>
+{% if pinned_num > 0 %}
+  {% for i in (offset..pinned.size) limit: pinned_num %}
+    {% assign posts = posts | push: pinned[i] %}
+  {% endfor %}
+{% else %}
+  {% assign pinned_num = 0 %}
+{% endif %}
 
-<details open="">
-  <summary><b>5. 多聊天平台部署AI Bot</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. 🔜
-    <a href="https://winxuan.github.io/posts/lark-deploy-stream-ai-bot/" target="_blank">飞书:部署流式输出AI Bot</a>
-    <br>
-  </div>
-</details>
+<!-- Get default posts -->
 
-<hr>
+{% assign default_beg = offset | minus: pinned.size %}
 
-<h1 id="基础技术相关">🧐<strong>基础技术相关</strong>🧐</h1>
+{% if default_beg < 0 %}
+  {% assign default_beg = 0 %}
+{% endif %}
 
-<details open="">
-  <summary><b>1. 自建个人独立blog站系列</b></summary>
-  <div style="margin-left: 40px !important;">
-    <details open="">
-      <summary>搭建小配置记录</summary>
-      <div style="margin-left: 40px !important;">
-        1. ✅
-        <a href="https://winxuan.github.io/posts/creat-blog/" target="_blank"
-          >使用github pages+jekyll快速搭建个人blog</a
-        >
-        <br>
-        2. ✅
-        <a href="https://winxuan.github.io/posts/fenced-code-blocks-indentation/" target="_blank"
-          >chirpy主题围栏代码块(Fenced Code Blocks)缩进功能添加</a
-        >
-        <br>
-        3. ✅
-        <a href="https://winxuan.github.io/posts/config-blog-comment/" target="_blank"
-          >使用giscus配置GitHub Pages评论功能</a
-        >
-        <br>
-        4. ✅
-        <a href="https://winxuan.github.io/posts/add-google-analytics/" target="_blank"
-          >使用Google Analysis监听GitHub pages页面访问量</a
-        >
-        <br>
-        5. ✅
-        <a href="https://winxuan.github.io/posts/blog-merge-theme-modify/" target="_blank"
-          >GitHub pages同步主题作者仓库更改</a
-        >
-        <br>
-        6. ✅
-        <a href="https://winxuan.github.io/posts/blog-google-search-include/" target="_blank"
-          >Google搜索收录Github Pages(Blog可以被Google搜索到)</a
-        >
-        <br>
-        7. ✅
-        <a href="https://winxuan.github.io/posts/blog-google-search-include-auto/" target="_blank"
-          >Google搜索收录Github Pages 自动化(Blog可以被Google搜索到)</a
-        >
-        <br>
-        8. ✅
-        <a href="https://winxuan.github.io/posts/blog-bing-search-include/" target="_blank"
-          >Bing搜索收录Github Pages(Blog可以被Bing搜索到)</a
-        >
-        <br>
-        9. 使用python脚本自动获取GitHub pages页面访问量 <br>
-        10. ✅
-        <a href="https://winxuan.github.io/posts/blog-img-add-cdn/" target="_blank"
-          >GitHub Pages添加图片CDN(加速国内访问)</a
-        >
-        <br>
-      </div>
-    </details>
-    <details open="">
-      <summary>搭建小问题解决记录</summary>
-      <div style="margin-left: 40px !important;">
-        1. ✅
-        <a href="https://winxuan.github.io/posts/blog-giscus-url/" target="_blank"
-          >giscus评论区出现:An error occurred URI_TOO_LONG</a
-        >
-        <br>
-        2. ✅
-        <a href="https://winxuan.github.io/posts/github-action-build-failure/" target="_blank"
-          >GitHub Actions出错--Build Failure with Ruby 3.x问题解决</a
-        >
-        <br>
-        3. ✅
-        <a href="https://winxuan.github.io/posts/html-fence-block-empty/" target="_blank"
-          >GitHub pages代码围栏块写入html显示为空问题解决</a
-        >
-        <br>
-      </div>
-    </details>
-  </div>
-</details>
+{% assign default_num = paginator.posts | size | minus: pinned_num %}
+{% assign default_end = default_beg | plus: default_num | minus: 1 %}
 
-<details open="">
-  <summary><b>2. IT技巧</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. ✅ <a href="https://winxuan.github.io/posts/win10-auto-login/" target="_blank">win10系统设置自动登录</a> <br>
-    2. ✅
-    <a href="https://winxuan.github.io/posts/windows-install-openssh-server/" target="_blank"
-      >Windows系统如何安装ssh服务端</a
-    >
-    <br>
-    3. ✅
-    <a href="https://winxuan.github.io/posts/windows-symbolic-link/" target="_blank"
-      >软链接--无法变更软件配置文件路径时的好办法</a
-    >
-    <br>
-    4. ✅
-    <a href="https://winxuan.github.io/posts/lsb-decode-ecode-demo/" target="_blank"
-      >最低有效位(LSB)隐写术将信息藏在PNG图片中</a
-    >
-    <br>
-    5. ✅
-    <a href="https://winxuan.github.io/posts/system-git-config-vpn/" target="_blank"
-      >Windows&Linux系统GitHub配置git命令VPN</a
-    >
-    <br>
-  </div>
-</details>
+{% if default_num > 0 %}
+  {% for i in (default_beg..default_end) %}
+    {% assign posts = posts | push: default[i] %}
+  {% endfor %}
+{% endif %}
 
-<details open="">
-  <summary><b>3. Cheat Engine</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. ✅
-    <a href="https://winxuan.github.io/posts/cheat-engine-install-windows/" target="_blank"
-      >Windows系统安装&配置ChatEngine</a
-    >
-    <br>
-  </div>
-</details>
+<div id="post-list" class="flex-grow-1 px-xl-1">
+  {% for post in posts %}
+    <article class="card-wrapper card">
+      <a href="{{ post.url | relative_url }}" class="post-preview row g-0 flex-md-row-reverse">
+        {% assign card_body_col = '12' %}
 
-<hr>
+        {% if post.image %}
+          {% assign src = post.image.path | default: post.image %}
+          {% unless src contains '//' %}
+            {% assign src = post.media_subpath | append: '/' | append: src | replace: '//', '/' %}
+          {% endunless %}
 
-<h1 id="测试开发相关">🤓<strong>测试开发相关</strong>🤓</h1>
+          {% assign alt = post.image.alt | xml_escape | default: 'Preview Image' %}
 
-<details open="">
-  <summary><b>1. Jenkins相关</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. ✅ <a href="https://winxuan.github.io/posts/jenkins-introduce/" target="_blank">Jenkins介绍</a> <br>
-    2. Jenkins安装与部署 <br>
-    3. ✅
-    <a href="https://winxuan.github.io/posts/jenkins-backup-and-quick-recovery/" target="_blank"
-      >Jenkins备份与快速恢复</a
-    >
-    <br>
-  </div>
-</details>
+          {% assign lqip = null %}
 
-<details open="">
-  <summary><b>2. 多分支开发下质量保障工具</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. 多分支Excel merge工具设计与开发 <br>
-    2. 多分支Excel blame工具设计与开发 <br>
-    3. 多分支merge diff工具设计与开发 <br>
-  </div>
-</details>
+          {% if post.image.lqip %}
+            {% capture lqip %}lqip="{{ post.image.lqip }}"{% endcapture %}
+          {% endif %}
 
-<details open="">
-  <summary><b>3. 游戏自动化测试相关</b></summary>
-  <div style="margin-left: 40px !important;">
-    1. 🔜 <a href="https://winxuan.github.io/posts/game-auto-test-design/" target="_blank">游戏自动化测试框架设计</a>
-    <br>
-  </div>
-</details>
+          <div class="col-md-5">
+            <img src="{{ src }}" alt="{{ alt }}" {{ lqip }}>
+          </div>
 
-<hr>
+          {% assign card_body_col = '7' %}
+        {% endif %}
 
-<h1 id="测试相关">🤓<strong>测试相关</strong>🤓</h1>
+        <div class="col-md-{{ card_body_col }}">
+          <div class="card-body d-flex flex-column">
+            <h1 class="card-title my-2 mt-md-0">{{ post.title }}</h1>
 
-<hr>
+            <div class="card-text content mt-0 mb-3">
+              <p>{% include post-description.html %}</p>
+            </div>
 
-<h1 id="读书笔记">🤗<strong>读书笔记</strong>🤗</h1>
+            <div class="post-meta flex-grow-1 d-flex align-items-end">
+              <div class="me-auto">
+                <!-- posted date -->
+                <i class="far fa-calendar fa-fw me-1"></i>
+                {% include datetime.html date=post.date lang=lang %}
 
-<hr>
+                <!-- categories -->
+                {% if post.categories.size > 0 %}
+                  <i class="far fa-folder-open fa-fw me-1"></i>
+                  <span class="categories">
+                    {% for category in post.categories %}
+                      {{ category }}
+                      {%- unless forloop.last -%},{%- endunless -%}
+                    {% endfor %}
+                  </span>
+                {% endif %}
+              </div>
 
-<h1 id="日常随笔">🤗<strong>日常随笔</strong>🤗</h1>
+              {% if post.pin %}
+                <div class="pin ms-1">
+                  <i class="fas fa-thumbtack fa-fw"></i>
+                  <span>{{ site.data.locales[lang].post.pin_prompt }}</span>
+                </div>
+              {% endif %}
+            </div>
+            <!-- .post-meta -->
+          </div>
+          <!-- .card-body -->
+        </div>
+      </a>
+    </article>
+  {% endfor %}
+</div>
+<!-- #post-list -->
 
-<details>
-  <summary><b>漫游散记</b></summary>
-  <div style="margin-left: 40px !important;">
-    <details open="">
-      <summary>深圳</summary>
-      <div style="margin-left: 40px !important;">1. 深圳市天文台 <br></div>
-    </details>
-    <details open="">
-      <summary>广州</summary>
-      <div style="margin-left: 40px !important;">
-        1. 广东省博物馆&amp;省图书馆 <br>
-        2. 广州市龙头山森林公园 <br>
-        3. 华南国家植物园 <br>
-        4. 广州市火炉山 <br>
-        5. 广州市白云山 <br>
-      </div>
-    </details>
-  </div>
-</details>
-
-<hr>
-
-<h1 id="英语学习">🤗<strong>英语学习</strong>🤗</h1>
-
-<!--
-  <div style="position: fixed; bottom: 0; right: 0;">
-      <a href="https://testingcf.jsdelivr.net/gh/winxuan/winxuan.github.io/assets/image/ArthurMorgan.png" class="popup img-link  shimmer"><img src="https://testingcf.jsdelivr.net/gh/winxuan/winxuan.github.io/assets/image/ArthurMorgan.png" alt="描述" style="width: 200px; height: auto;" loading="lazy"></a>
-  </div>
--->
-
-<button id="refreshButton" onclick="refreshPage()">绕过缓存获取最新内容</button>
-
-<script>
-  function toggleDetails() {
-    const details = document.querySelectorAll('details');
-    const button = document.getElementById('toggleButton');
-    const areAllOpen = Array.from(details).every((detail) => detail.hasAttribute('open'));
-
-    if (areAllOpen) {
-      details.forEach((detail) => detail.removeAttribute('open'));
-      button.innerText = '展开所有小分页';
-    } else {
-      details.forEach((detail) => detail.setAttribute('open', ''));
-      button.innerText = '折叠所有小分页';
-    }
-  }
-
-  function openAllDetails() {
-    document.querySelectorAll('details').forEach((detail) => {
-      detail.setAttribute('open', '');
-    });
-  }
-
-  function refreshPage() {
-    const now = new Date().getTime();
-    window.location.href = window.location.href.split('?')[0] + '?updated=' + now;
-  }
-</script>
+{% if paginator.total_pages > 1 %}
+  {% include post-paginator.html %}
+{% endif %}
