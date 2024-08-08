@@ -1,6 +1,6 @@
 {% assign enable_toc = false %}
 {% if site.toc and page.toc %}
-  {% if page.content contains '<h2' or page.content contains '<h3' %}
+  {% if page.content contains '<h1' or page.content contains '<h2' or page.content contains '<h3' or page.content contains '<h4' or page.content contains '<h5' %}
     {% assign enable_toc = true %}
   {% endif %}
 {% endif %}
@@ -8,6 +8,36 @@
 {% if enable_toc %}
   <section id="toc-wrapper" class="ps-0 pe-4">
     <h2 class="panel-heading ps-3 pt-2 mb-2">{{- site.data.locales[include.lang].panel.toc -}}</h2>
-    <nav id="toc"></nav>
+    <nav id="toc">
+      <ul class="toc-list">
+        {% capture heading_levels %}h1, h2, h3, h4{% endcapture %}
+        {% assign current_depth = 1 %}
+        {% assign in_section = false %}
+        {% assign in_section_depth = 0 %}
+        {% for match in page.content | split:'<' %}
+          {% assign tag = match | split:'>' | first %}
+          {% if tag == 'h1' or tag == 'h2' or tag == 'h3' or tag == 'h4' %}
+            {% assign depth = tag | replace:'h','' | plus:1 %}
+            {% if depth <= 4 %}
+              {% if current_depth < depth %}
+                {% assign diff = depth | minus: current_depth %}
+                {% for i in (1..diff) %}
+                  <ul class="toc-list">
+              {% endfor %}
+              {% elsif current_depth > depth %}
+                {% assign diff = current_depth | minus: depth %}
+                {% for i in (1..diff) %}
+                  </ul>
+                {% endfor %}
+              {% endif %}
+              <li>
+                <a href="#{{ match | split:'>' | last | replace:'</h' | remove:'>' | slugify }}">{{ match | split:'>' | last | replace:'</h' | remove:'>' }}</a>
+              </li>
+              {% assign current_depth = depth %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </nav>
   </section>
 {% endif %}

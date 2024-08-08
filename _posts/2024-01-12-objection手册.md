@@ -2,8 +2,8 @@
 
 title: objection手册
 date: 2024-01-12 11:00:00 +0800
-categories: [objection]
-tags: [android,objection]
+categories: [Android]
+tags: [Objection,Frida]
 
 ---
 ### 连接fr-server：
@@ -26,7 +26,7 @@ tags: [android,objection]
 objection -g com.cz.babySister  explore -c ".\2.txt"
 ```
 
-![1699270132281](./)
+![1699270132281](/assets/image/2024-01-12-objection手册/1699270132281.png)
 
 ### 内存搜索
 
