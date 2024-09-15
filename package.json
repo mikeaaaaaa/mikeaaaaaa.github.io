@@ -108,5 +108,8 @@
         "section": "Improvements"
       }
     ]
+  },
+  "dependencies": {
+    "jekyll-theme-chirpy": "file:"
   }
 }
