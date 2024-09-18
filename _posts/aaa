@@ -1,0 +1,12 @@
+[Interface]
+PrivateKey = CCxfVPvykBNzX59K4dUxZiaLbZM20SCYyy6CvaBp1FM=
+Address = 192.168.100.23/24
+DNS = 1.1.1.1
+
+
+[Peer]
+PublicKey = tUwZM1OwIEt9mBD6kzmDZTlzYRPlMNz4kLiOSL47Xg4=
+PresharedKey = wnXXmT8Jbn9EdxhV1qIC6JDZyW5W4u2far87jc59H/A=
+AllowedIPs = 192.168.100.0/24
+PersistentKeepalive = 25
+Endpoint = wg.jiaxintang.online:10010
