@@ -1,5 +1,6 @@
 ---
 
+]
 title: 廖雪峰Java学习笔记
 date: 2024-09-30 11:00:00 +0800
 categories: [java,Spring,SpringNoot]
@@ -1305,7 +1306,7 @@ public static void main(String[] args) throws Exception {
 @PostMapping(value = "/file1")  
 public String file1(MultipartFile image) {  
     String content = String.format("name = %s,originName = %s,size = %d",  
-            multipartFile.getName(), multipartFile.getOriginalFilename(), multipartFile.getSize());  
+            multipartFile.getName(), multipartFile.getOriginalFilename(), 	     multipartFile.getSize());  
     log.info(content);  
     return content;  
 }  
@@ -1313,7 +1314,71 @@ public String file1(MultipartFile image) {
 
 
 
+#### 全局异常处理
 
+主要使用 `@ControllerAdvice`或者 `@ControllerAdviceRest`注解 定义全局异常处理类，可以让我们在一个集中位置为所有的控制器进行统一的**异常处理**、**全局数据绑定**和**预处理**：
+
+```java
+@ControllerAdvice
+public class GlobalControllerAdvice {
+
+    // 全局异常处理
+    @ExceptionHandler(Exception.class)
+    public ModelAndView handleException(Exception ex) {
+        ModelAndView model = new ModelAndView("error");
+        model.addObject("message", ex.getMessage());
+        return model;
+    }
+
+    // 全局数据绑定
+    @ModelAttribute
+    public void addAttributes(Model model) {
+        model.addAttribute("appName", "My Application");
+    }
+
+    // 全局数据预处理
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        // 自定义绑定器，可以处理全局的日期转换等
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), false));
+    }
+}
+
+```
+
+当然使用最为广泛的就是 异常处理。
+
+**重点**:异常处理方法没有固定的方法签名，可以传入`Exception`、`HttpServletRequest`等，返回值可以是`void`，也可以是`ModelAndView`，上述代码通过`@ExceptionHandler(RuntimeException.class)`表示当发生`RuntimeException`的时候，就自动调用此方法处理。
+
+#### 处理CORS
+
+**CORS**（Cross-Origin Resource Sharing，跨域资源共享）是浏览器的一种机制，用于解决 **跨域请求** 的问题。它涉及到浏览器的 **同源策略**，这是保护网站安全的重要机制之一。
+
+举例：比如我们打开哔哩哔哩首页，其中有一个ajax请求用于请求获取后端获取时评列表列表
+
+**同源策略** 是**浏览器**的一个安全特性，它限制了来自不同源的资源或脚本的相互访问。**同源**指的是：
+
+- **协议**相同
+- **域名**相同（包括子域名都要相同）
+- **端口**相同
+
+只有在满足这三个条件时，浏览器才允许一个网页访问另一个网页的资源。如果不同源之间要进行资源访问（包括Ajax请求、dom访问、Cookie、LocalStorage、IndexDb等都默认在同源下共享），默认情况下浏览器会阻止，除非服务器明确允许。
+
+`CORS`就是为了打破同源策略而生，其工作原理如下：
+
+1、对于简单请求（请求方法为GET、POST、HEAD）
+
+​	**浏览器发起请求**：请求头中携带 `Origin`，比如 `Origin: http://example.com`
+
+​	**服务器响应**：服务器响应头中包含 `Access-Control-Allow-Origin`，如果这个值和 `Origin` 匹				配，浏览器才会允许访问，否则请求失败。
+
+2、对于复杂请求（请求方法为PUT、Delete）
+
+​	**浏览器发送预检请求**：请求方法为 `OPTIONS`，请求头中包含 `Origin` 和 `Access-Control-				Request-Method`，表示浏览器想要使用的实际方法
+
+​	**服务器响应**：服务器通过 `Access-Control-Allow-Methods` 和 `Access-Control-Allow-Headers` 等头部告知浏览器是否允许这些操作
+
+3、如果服务器允许跨域，浏览器会继续发起实际的请求，
 
 ### RESTful
 
@@ -1442,11 +1507,87 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
 
 
+### 前后端分离开发
+
+以前学习Spring boot都是低着头学，对于整体的前后端开发没有一个掌握，只闷头学后端，这是不行的。
+
+首先我们先来真题了解一下用户从网页输入到浏览器显示所经历的流程：
+
+![1](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/1.png)
 
 
 
+前后端分离的核心思想：前端HTML页面通过AJAX调用后端的RESTFUL API接口并使用JSON数据进行交互。
+
++ Web服务器：一般指像Nginx，Apache这类的服务器，他们一般只能解析静态资源
++  应用服务器：一般指像Tomcat，Jetty，Resin这类的服务器可以解析动态资源也可以解析静态资源，但解析静态资源的能力没有web服务器好；**一般都是只有web服务器才能被外网访问，应用服务器只能内网访问**
 
 
 
+#### 未分离时代（各种耦合）
+
+早期的 `MVC`框架，`Jsp` + `Servlet`的结构图如下
+
+![640?wx_fmt=jpeg](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/b8bfa85948646911cbffffc671c5f051.jpeg)
+
+大致就是所有的请求都被发送给Servlet，它接受请求，并根据请求信息将它们分发给适当的JSP来响应。同时，**Servlet还根据JSP的需求生成JavaBeans的实例并输出给JSP环境**。JSP可以通过直接调用方法或使用UseBean的自定义标签得到JavaBeans中的数据。需要说明的是，这个View还可以采用 Velocity、Freemaker 等模板引擎。使用了这些模板引擎，可以使得开发过程中的人员分工更加明确，还能提高开发效率。
+
+#### 半分离时代
+
+前后端半分离，前端负责开发页面，通过接口（Ajax）获取数据，采用Dom操作对页面进行数据绑定，最终是由前端把页面渲染出来。这也就是Ajax与SPA应用（单页应用）结合的方式，其结构图如下：
+
+![11](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/11.jpeg)
+
+其中 `CDN`是内容分发器，通过将一组分散全球各地的服务器将内容从距离用户最近的服务器高速发送给用户。
+
+（1）浏览器请求，CDN返回HTML页面；
+（2）HTML中的JS代码以Ajax方式请求后台的Restful接口；
+（3）接口返回Json数据，页面解析Json数据，通过Dom操作渲染页面；
+
+ 那么意味着WEB工作流程是：
+      1、打开web，加载基本资源，如CSS，JS等；
+      2、发起一个Ajax请求再到服务端请求数据，同时展示loading；
+      3、得到json格式的数据后再根据逻辑选择模板渲染出DOM字符串；
+      4、将DOM字符串插入页面中web view渲染出DOM结构；
+
+      这些步骤都由用户所使用的设备中逐步执行，也就是说用户的设备性能与网页展示速度联系的更紧换句话说就是如果用户的设备很低端，那么浏览器打开页面的速度会越慢。
+
+前端不会嵌入任何后台代码，前端专注于HTML、CSS、JS的开发，不依赖于后端。自己还能够模拟Json数据来渲染页面。发现Bug，也能迅速定位出是谁的问题。但是缺点也很明显：在业务复杂的情况下，页面的渲染部分的代码，非常复杂，在Json返回的数据量比较大的情况下，渲染的十分缓慢，会出现页面卡顿的情况。资源消耗严重，在业务复杂的情况下，一个页面可能要发起多次HTTP请求才能将页面渲染完毕（特别是移动端资源有限）。
+
+#### 全分离时代
+
+单页面应用：
+
+整个网站仅包含**一个 HTML 页面**，所有的页面内容和逻辑通过 JavaScript 动态加载和更新。用户在访问不同功能或页面时，实际上并没有进行完整的页面刷新，浏览器不会重新加载整个页面，而是通过**AJAX 或 Fetch 请求**动态获取数据和部分 HTML 片段，更新当前页面的部分内容。
+
+多页面应用：
+
+传统的 Web 开发模式，用户每次访问不同的页面或执行不同的操作时，都会向服务器发送新的请求，服务器返回一个全新的 HTML 页面，浏览器加载并渲染这个页面。每次导航都伴随**页面刷新**。
 
 
+
+ 大家一致认同的前后端分离的例子就是SPA(Single-page application)，所有用到的展现数据都是后端通过异步接口(AJAX/JSONP)的方式提供的，前端只管展现。从某种意义上来说，SPA确实做到了前后端分离，但这种方式存在两个问题：
+
++ WEB服务中，SPA类占的比例很少。很多场景下还有同步/同步+异步混合的模式，SPA不能作为一种通用的解决方案
++ 现阶段的SPA开发模式，接口通常是按照展现逻辑来提供的，而且为了提高效率我们也需要后端帮我们处理一些展现逻辑，这就意味着后端还是涉足了view层的工作，不是真正的前后端分离
+
+SPA式的前后端分离，从物理层做区分（认为只要是客户端的就是前端，服务器端就是后端）这种分法已经无法满足前后端分离的需求，我们认为从职责上划分才能满足目前的使用场景：
+
+- 前端负责view和controller层
+- 后端只负责model层，业务处理与数据持久化等
+
+ 可是服务端人员对前端HTML结构不熟悉，前端也不懂后台代码呀，controller层如何实现呢？这就是[node](https://so.csdn.net/so/search?q=node&spm=1001.2101.3001.7020).js的妙用了，node.js适合运用在高并发、I/O密集、少量业务逻辑的场景。最重要的一点是，前端不用再学一门其他的语言了，对前端来说，上手度大大提高。![222](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/222.jpeg)
+
+​	可以就把Nodejs当成跟前端交互的api。总得来说，NodeJs的作用在MVC中相当于C（控制器）。Nodejs路由的实现逻辑是把前端静态页面代码当成字符串发送到客户端（例如浏览器），简单理解可以理解为路由是提供给客户端的一组api接口，只不过返回的数据是页面代码的字符串而已。
+
+​	用NodeJs来作为桥梁架接服务器端API输出的JSON。后端出于性能和别的原因，提供的接口所返回的数据格式也许不太适合前端直接使用，前端所需的排序功能、筛选功能，以及到了视图层的页面展现，也许都需要对接口所提供的数据进行二次处理。这些处理虽可以放在前端来进行，但也许数据量一大便会浪费浏览器性能。因而现今，增加Node中间层便是一种良好的解决方案。具体流程如下：
+
+ 浏览器(webview)不再直接请求JSP的API，而是：
+
++ 1）浏览器请求服务器端的NodeJS
++ 2）NodeJS再发起HTTP去请求JSP；
++ 3）JSP依然原样API输出JSON给NodeJS；
++ 4）**NodeJS收到JSON后再渲染出HTML页面**；
++ 5）**NodeJS直接将HTML页面flush到浏览器**；
+
+![123](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-6948f667b267d677aa05e6b047a6b70f.jpeg)
