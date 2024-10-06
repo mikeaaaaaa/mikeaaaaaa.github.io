@@ -6,6 +6,7 @@ categories: [抓包]
 tags: [Mitmproxy,Extension]
 
 ---
+## mitmproxy 使用手册
 ### 选择原因
 
 `mitmproxy`是一种高度可定制化的抓包工具，因为其可以支持`python` API而大受本人的喜爱，当然如果是一般的抓包分析工作的话，我肯定会交给 `charles`（UI操作，快速，操作简单，可视化比较好）。

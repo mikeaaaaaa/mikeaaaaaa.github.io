@@ -6,6 +6,7 @@ categories: [杂知识]
 tags: [ELF,NDK,IDA,ARM]
 
 ---
+## ELF,NDK,IDA,ARM
 ### ELF文件
 
 ELF文件：可执行、可链接的二进制文件,是linux中的二进制文件。可以理解成windws中的PE文件。在Android中可理解为dll，方便函数的移植，常用于Android逆向难度

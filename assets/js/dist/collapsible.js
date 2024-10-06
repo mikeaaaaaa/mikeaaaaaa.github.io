@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", function () {
       let trigger = coll[i].querySelector('.collapsible-trigger');
       let content = coll[i].querySelector('.collapsible-content');
       let codeLines = (content.textContent.split('\n').length - 1) / 2; // 计算实际的代码行数
-   
       console.log(codeLines)
 
       if (codeLines <= defaultOpenLines) {
