@@ -1067,9 +1067,9 @@ public class AppConfig {
 
 
 
-## Web开发
 
-### SpringMVC
+
+## SpringMVC
 
 提到Spring之前我的第一反应就是 web开发！！！，但其实不是的，Spring 是一个**全面的 Java 企业级应用开发框架**，它为 Java 应用提供了很多基础功能，覆盖面远超 Web 开发：
 
@@ -1244,7 +1244,7 @@ public static void main(String[] args) throws Exception {
 
 答：在 Spring MVC 中，**Handler**（处理器）是指处理 HTTP 请求的核心组件。具体来说，Handler 负责根据客户端的请求做出响应，而一个 **Handler** 通常是一个带有注解的 **控制器方法**。控制器方法就是handler。
 
-#### Convert
+### Convert
 
 这里提一嘴SpringMVC强大的参数处理功能：
 
@@ -1261,7 +1261,7 @@ public static void main(String[] args) throws Exception {
 
 
 
-#### 接收请求参数所有方式总结
+### 接收请求参数所有方式总结
 
 这里再提一句SpringMVC对于 表单参数、Query参数、Post请求体参数处理的区别（请求参数所有类型）： 
 
@@ -1314,7 +1314,7 @@ public String file1(MultipartFile image) {
 
 
 
-#### 全局异常处理
+### 全局异常处理
 
 主要使用 `@ControllerAdvice`或者 `@ControllerAdviceRest`注解 定义全局异常处理类，可以让我们在一个集中位置为所有的控制器进行统一的**异常处理**、**全局数据绑定**和**预处理**：
 
@@ -1350,7 +1350,7 @@ public class GlobalControllerAdvice {
 
 **重点**:异常处理方法没有固定的方法签名，可以传入`Exception`、`HttpServletRequest`等，返回值可以是`void`，也可以是`ModelAndView`，上述代码通过`@ExceptionHandler(RuntimeException.class)`表示当发生`RuntimeException`的时候，就自动调用此方法处理。
 
-#### 处理CORS
+### 处理CORS
 
 **CORS**（Cross-Origin Resource Sharing，跨域资源共享）是浏览器的一种机制，用于解决 **跨域请求** 的问题。它涉及到浏览器的 **同源策略**，这是保护网站安全的重要机制之一。
 
@@ -1380,6 +1380,74 @@ public class GlobalControllerAdvice {
 
 3、如果服务器允许跨域，浏览器会继续发起实际的请求，
 
+其实我们可以注意到，跨域能否成功，决定权永远在与提供 API 的服务提供方手里，因此我们在开发项目时需要正确设置CORS。
+
+
+
+第一种方法是使用`@CrossOrigin`注解，可以在`@RestController`的class级别或方法级别定义一个`@CrossOrigin`，例如：
+
+> ```java
+> @CrossOrigin(origins = "http://local.liaoxuefeng.com:8080")
+> ```
+
+上述定义在`ApiController`处的`@CrossOrigin`指定了只允许来自`local.liaoxuefeng.com`跨域访问，允许多个域访问需要写成数组形式，例如`origins = {"http://a.com", "https://www.b.com"})`。如果要允许任何域访问，写成`origins = "*"`即可。
+
+如果有多个REST Controller都需要使用CORS，那么，每个Controller都必须标注`@CrossOrigin`注解。
+
+
+
+第二种方法是在`WebMvcConfigurer`中定义一个全局CORS配置，下面是一个示例：
+
+```java
+@Override
+public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/api/**")
+        .allowedOrigins("http://local.liaoxuefeng.com:8080")
+        .allowedMethods("GET", "POST")
+        .maxAge(3600);
+    // 可以继续添加其他URL规则:
+    // registry.addMapping("/rest/v2/**")...
+}
+```
+
+推荐使用这种方式配置CORS
+
+### 异步处理
+
+ 在Servlet模型中，每个请求都是由某个线程处理，然后，将响应写入IO流，发送给客户端。从开始处理请求，到写入响应完成，都是在同一个线程中处理的。对于Tomcat这样的Servlet容器，其通常是通过线程池来处理请求。
+
+这种线程模型非常重要，因为Spring的JDBC事务是基于`ThreadLocal`实现的，如果在处理过程中，一会由线程A处理，一会又由线程B处理，那事务就全乱套了。此外，很多安全认证，也是基于`ThreadLocal`实现的，可以保证在处理请求的过程中，各个线程互不影响。
+
+但是，如果一个请求处理的时间较长，例如几秒钟甚至更长，那么，这种基于线程池的同步模型很快就会把所有线程耗尽，导致服务器无法响应新的请求。如果把长时间处理的请求改为异步处理，那么线程池的利用率就会大大提高。
+
+![img](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-6298f67d605218bd1b2b2db5193c46bc.png)
+
+首先我们需要在 `web.xml`中开启异步支持;
+
+```xml
+<async-support>true</async-support>
+```
+
+下一步就是在Controller中编写async处理逻辑。我们以`ApiController`为例，演示如何异步处理请求。
+
+第一种async处理方式是返回一个`Callable`，Spring MVC自动把返回的`Callable`放入线程池执行，等待结果返回后再写入响应：
+
+```java
+@GetMapping("/users")
+public Callable<List<User>> users() {
+    return () -> {
+        // 模拟3秒耗时:
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+        }
+        return userService.getUsers();
+    };
+}
+```
+
+
+
 ### RESTful
 
 在Web应用中，除了需要使用MVC给用户显示页面外，还有一类API接口，我们称之为REST，通常输入输出都是JSON，便于第三方调用或者使用页面JavaScript与之交互。
@@ -1394,7 +1462,7 @@ public class GlobalControllerAdvice {
 
 
 
-#### Interceptor 与 Filter
+### Interceptor 与 Filter
 
 Filter属于标准Servlet组件之一，因此是由Servlet管理，Filter组件实际上并不知道后续内部处理是通过Spring MVC提供的`DispatcherServlet`还是其他Servlet组件，因为Filter是Servlet规范定义的标准组件，它可以应用在任何基于Servlet的程序中。
 
@@ -1591,3 +1659,15 @@ SPA式的前后端分离，从物理层做区分（认为只要是客户端的�
 + 5）**NodeJS直接将HTML页面flush到浏览器**；
 
 ![123](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-6948f667b267d677aa05e6b047a6b70f.jpeg)
+
+当然Nodejs也不是白增加的，有以下好处：
+
+ (1)适配性提升；我们其实在开发过程中，经常会给PC端、mobile、app端各自研发一套前端。其实对于这三端来说，大部分端业务逻辑是一样的。唯一区别就是交互展现逻辑不同。如果controller层在后端手里，后端为了这些不同端页面展示逻辑，自己维护这些controller，模版无法重用，徒增和前端沟通端成本。 如果增加了node.js层，此时架构图如下：
+
+![640?wx_fmt=jpeg](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-833d36620df14b921260810427ae3859.jpeg)
+
+如果产品经理中途想要改动界面什么的，可以由前端自己专职维护，后端无需操心。前后端各司其职，后端专注自己的业务逻辑开发，前端专注产品效果开发
+
+(2)响应速度提升；我们有时候，会遇到后端返回给前端的数据太简单了，前端需要对这些数据进行逻辑运算。那么在数据量比较小的时候，对其做运算分组等操作，并无影响。但是当数据量大的时候，会有明显的卡顿效果。这时候，node中间层其实可以将很多这样的代码放入node层处理、也可以替后端分担一些简单的逻辑、又可以用模板引擎自己掌握前台的输出。这样做灵活度、响应度都大大提升。
+
+ (3)性能得到提升；大家应该都知道单一职责原则。从该角度来看，我们，请求一个页面，可能要响应很多个后端接口，请求变多了，自然速度就变慢了，这种现象在mobile端更加严重。采用node作为中间层，将页面所需要的多个后端数据，直接在内网阶段就拼装好，再统一返回给前端，会得到更好的性能
