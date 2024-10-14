@@ -1,6 +1,5 @@
 ---
 
-]
 title: 廖雪峰Java学习笔记
 date: 2024-09-30 11:00:00 +0800
 categories: [java,Spring,SpringNoot]
@@ -72,7 +71,7 @@ JPA的实现我们称之为：ORM框架，springboot默认使用`hibernate`作�
 
 ctrl + b  === CTRL + 左键
 
-CTRL + sheft + b === ctrl + alt + 左键 	
+CTRL + sheft + b === ctrl + alt + 左键 
 
 
 
@@ -351,6 +350,1467 @@ public LocalContainerEntiryManagerFactoryBean createEntitymanagerFactory(@AutoWi
     var emFactory  = new LocalCOn
 }
 ```
+
+
+
+# Java基础
+
+## 集合
+
+![Java集合类详解| Java知识梳理，形成Java知识体系，成为Java专家](https://lh5.googleusercontent.com/proxy/a7GXy1MnPRZxhJZo1En0xYcOOeRxEbPddRMODZP7bhri4n5mJfkAfmjS499LzBOyzkYHsl5CETrE7XrB1UWaG1XP2ljzTMnqerU9NpJ5nfyQP6CAPDDq4QigsYjzNqxZMfKLj9bqs1TwfGQzGpDGJP0Io6QZXr1axB8)
+
+<img src="https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-f1c4ad151337dbedc4804f31175874be.png" alt="img" style="zoom:50%;" />
+
+### Collection接口
+
+Collection是最基本的集合接口，一个Collection代表一组Object，即Collection的元素（Elements）。一些Collection允许相同的元素而另一些不行。一些能排序而另一些不行。Java SDK不提供直接继承自Collection的类，Java SDK提供的类都是继承自Collection的“子接口”如List和Set。由Collection接口派生的接口为：List和Set；
+
+```java
+Iterator it = collection.iterator();
+while(it.hasNext()){
+    Object obj = it.next();
+}
+```
+
+#### List接口
+
+LIst是有序的Collection，类似于Java中的数组；除了具有Collection接口必备的iterator()方法外，List还提供一个listIterator()方法，返回一个ListIterator接口，和标准的Iterator接口相比，ListIterator多了一些add()之类的方法，允许添加，删除，设定元素，还能向前或向后遍历。
+
+实现List的常用类有：
+
++ LinkedList：优点在于快速删除添加元素，非常快速的对首尾元素进行操作；
++ ArrayList：优点在于随机访问，
++ Vector：非常类似ArrayList，只是这个类是同步的
++ Stack：继承自Vector
+
+### Map接口
+
+请注意，Map没有继承Collection接口，Map提供key到value的映射。一个Map中不能包含相同的key，每个key只能映射一个value
+
+#### HashMap
+
+由于作为key的对象将通过计算其散列函数来确定与之对应的value的位置，因此任何作为key的对象都必须实现hashCode和equals方法。hashCode和equals方法继承自根类Object，如果你用自定义的类当作key的话，要相当小心，按照散列函数的定义，如果两个对象相同，即obj1.equals(obj2)=true，则它们的hashCode必须相同，但如果两个对象不同，则它们的hashCode不一定不同，**如果两个不同对象的hashCode相同，这种现象称为冲突，冲突会导致操作哈希表的时间开销增大，所以尽量定义好的hashCode()方法，能加快哈希表的操作**。
+
+#### HashTable
+
+和HashMap非常类似，只是这个类是非同步的。
+
+#### TreeMap
+
+基于红黑树实现的。TreeMap的特点在于，你得到的结果是经过排序的。TreeMap是唯一的带有subMap()方法的Map，它可以返回一个子树。
+
+## Java流
+
+Java中的流分为两种，一种是字节流，另一种是字符流，分别由四个抽象类来表示（每种流包括输入和输出两种所以一共四个）:InputStream，OutputStream，Reader，Writer。Java中其他多种多样变化的流均是由它们派生出来的。
+
+### 字节流与字符流区别：
+
+字节流按照8位传输，字节流是最基本的，所有文件的储存是都是字节（byte）的储存，在磁盘上保留的并不是文件的字符而是先把字符编码成字节，再储存这些字节到磁盘；
+
+1. 字节流可用于任何类型的对象，包括二进制对象，而字符流只能处理字符或者字符串；
+2. 字节流提供了处理任何类型的IO操作的功能，但它不能直接处理Unicode字符，而字符流就可以。
+3. 既然字节流那么牛，为什么还要字符流：理论上任何文件都能够用字节流读取，但当读取的是文本数据时，为了能还原成文本你必须再经过一个转换的工序，相对来说字符流就省了这个麻烦，可以有方法直接读取。字符流处理的单元为2个字节的Unicode字符，分别操作字符、字符数组或字符串，而字节流处理单元为1个字节， 操作字节和字节数组。所以字符流是由Java虚拟机将字节转化为2个字节的Unicode字符为单位的字符而成的，所以它对多国语言支持性比较好！
+
+### Filter模式
+
+标准的 InputStream可以来自非常多的地方：
+
++ FileInputStream：来自文件读取
++ ServletInputstream：从Http请求中读取
++ Socket.getInputStream：从TCP连接中读取数据
++ ByteArrayInputStream：从字节数组中读取数据
++ 。。。。。。
+
+还有非常多的InputStream获取方式。
+
+如果我们要给FileInputStream添加缓冲功能，则可以从FileInputStream派生出一个子类
+
+```java
+BufferedFileInputStream extends FileInputStream {}
+```
+
+如果要给`FileInputStream`添加计算签名的功能，类似的，也可以从`FileInputStream`派生一个类：DigestFileInputStream
+
+如果要给`FileInputStream`添加加密/解密功能，还是可以从`FileInputStream`派生一个类：CipherFileInputStream
+
+再加上各种功能组合需求，这样直接继承的方式非常不实用，因此需要更好的机制；
+
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+JDK首先将`InputStream`分为两大类：
+
+一类是直接提供数据的基础`InputStream`，例如：
+
+- FileInputStream
+- ByteArrayInputStream
+- ServletInputStream
+- ...
+
+一类是提供额外附加功能的`InputStream`，例如：
+
+- BufferedInputStream
+- DigestInputStream
+- CipherInputStream
+- ...
+
+当我们需要给一个“基础”`InputStream`附加各种功能时，我们先确定这个能提供数据源的`InputStream`，因为我们需要的数据总得来自某个地方，例如，`FileInputStream`，数据来源自文件：
+
+```java
+InputStream file = new FileInputStream("test.gz");
+```
+
+紧接着，我们希望`FileInputStream`能提供缓冲的功能来提高读取的效率，因此我们用`BufferedInputStream`包装这个`InputStream`，得到的包装类型是`BufferedInputStream`，但它仍然被视为一个`InputStream`：
+
+```java
+InputStream buffered = new BufferedInputStream(file);
+```
+
+最后，假设该文件已经用gzip压缩了，我们希望直接读取解压缩的内容，就可以再包装一个`GZIPInputStream`：
+
+```java
+InputStream gzip = new GZIPInputStream(buffered);
+```
+
+无论我们包装多少次，得到的对象始终是`InputStream`，我们直接用`InputStream`来引用它，就可以正常读取：
+
+![image-20241008154527743](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-c541c797b57a5f7d149100a57d95d59f.png)
+
+上述这种通过一个“基础”组件再叠加各种“附加”功能组件的模式，称之为**Filter模式（或者装饰器模式：Decorator）**。它可以让我们**通过少量的类来实现各种功能的组合**：
+
+**重点**：注意到在叠加多个`FilterInputStream`，我们只需要持有最外层的`InputStream`，并且，当最外层的`InputStream`关闭时（在`try(resource)`块的结束处自动关闭），内层的`InputStream`的`close()`方法也会被自动调用，并最终调用到最核心的“基础”`InputStream`，因此不存在资源泄露。
+
+
+
+### 缓冲流
+
+为了提高数据的读写效率，Java中又定义了四种缓冲流：BufferedInputStream、BufferedOutputStream、BufferedWriter、BufferedWriter；
+
+![image-20240914115535628](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/image-20240914115535628.png)
+
+#### 原理
+
+Java 缓冲流的原理主要是通过内存中的缓冲区来提高输入输出操作的效率。在没有缓冲流的情况下，每次读取或写入数据时，都会进行一次实际的I/O操作，这样的频繁操作性能开销较大。缓冲流通过在内存中维护一个缓冲区，将数据暂时存储在缓冲区中，从而减少直接进行I/O操作的次数，提升性能。
+
+![image-20240914120511593](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/image-20240914120511593.png)
+
+
+
+高级流都是对基本流的封装，其底层依旧使用基本流读写数据，但是其新增了一些非常好用的方法。
+
+#### 实例
+
+使用字节流拷贝文件：
+
+```java
+import java.io.*;
+public class Test {
+    public static void main(String[] args) throws IOException {
+        /*
+        利用字节缓冲流拷贝文件
+         */
+        
+        //1. 创建缓冲流对象
+        BufferedInputStream bis=new BufferedInputStream(new FileInputStream("test.txt"));
+        BufferedOutputStream bos=new BufferedOutputStream(new FileOutputStream("copy.txt"));
+        //循环读取数据并写入文件
+        byte[] buffer = new byte[1024];
+        while ((len=bis.read(buffer))!=-1){
+            bos.write(buffer,0,len);
+        }
+        //释放资源，不用释放传入的基本流
+        bos.close();
+        bis.close();
+    }
+}
+```
+
+
+
+ 使用字符流实现文件拷贝：
+
+```java
+import java.io.*;
+public class Test {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+        BufferedWriter bw = new BufferWriter(new FileWriter("test2.txt"));
+        String s;
+        while ((s=br.readLine())!=null){
+            bw.write(s);
+            bw.newLine();
+        }
+        br.close();
+        bw.close();
+    }
+}
+```
+
+
+
+### 读取Classpath资源
+
+跨平台执行Java程序时会涉及到不同平台 路径 区别，因此将文件写死读取并不是一个好习惯；
+
+从classpath读取文件就可以避免 不同环境下路径不一致问题：将文件放置在classpath中就可以不关心它的实际存放路径；在`Classpath`中存放文件，总是以 `/`开头，首先获取到当前class对象，之后调用 `getResourceAsStream()`就可以直接从 classpath中读取任意配置文件了；
+
+```java
+try(InputStream input = getClass().getResourceAsStream()){
+    if(input!=null){
+        
+    }
+    // 文件不存在
+    
+}
+```
+
+
+
+### Writer and Reader
+
+![Open Source For Geeks: 09/28/14](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgctqJYzbD1Stg_WwSf0rTV413gMP-H00BaNLNO9DhAJ07iY8xQfow4KlpUvbZHFn4UmupHKIr64qpkMrUU_MnOSRLg6KKxkD8Obp9Di7aWG9Q50vLS20PFV2iqhWbmlYKCpDdiI-EVxh0S/s1600/IOReaderWriter.gif)
+
+### File 工具类
+
+从Java7开始，提供了 `Files`工具类，极大方便我们读写文件：
+
+1、将文件所有内容读取成bytes
+
+`byte[] data = Files.readAllBytes(Path.of("/path/to/file.txt"))`
+
+
+
+`byte[] data = Files.readString(Path.of("/path","to","file.txt"),StandardCharsets.UTF_8);`
+
+`List<String> lines = Files.readAllLines(Path.of());`
+
+2、写入文件
+
+```java
+// 写入二进制文件
+byte[] data = xxx;
+Files.write(Path.of(),data);
+
+// 写入文本文件
+String text = "xxx";
+Files.writeString(Path.of(),text,StandardCharsets.UTF_8);
+
+// 按行写入本文
+list<String> lines = xxx;
+Files.write(Path.of(),lines);
+```
+
+此外，`Files`工具类还有`copy()`、`delete()`、`exists()`、`move()`等快捷方法操作文件和目录。
+
+最后需要特别注意的是，`Files`提供的读写方法，受内存限制，只能读写小文件，例如配置文件等，不可一次读入几个G的大文件。读写大型文件仍然要使用文件流，每次只读写一部分文件内容。
+
+## 单元测试
+
+通常是使用`Junit`进行单元测试，最主要使用 `@Test`注解  以及  断言：
+
+常见的断言有：
+
++ `assertEquals(xxa,xxb)`：期待结果相等
++ `assertTrue(func(xx))`：期待结果为True
++ `assertFalse(func(xxx))`：期待结果为False
++ `assertNotNull()`：期待结果不为空
++ `assertArrayEqual()`：期待两个数组完全相等
+
+某些测试环境可能有特殊需求，需要初始化一些对象啥的，这个可以使用 两个注解来完成，这两个注解标记的方法会环绕在每一个Test方法前后：
+
++ `@BeforeEach`：为每个Test方法初始化对象
++ `@BeforeAll`:
++ `@AfterEach`：清理资源
++ `@AfterAll`
+
+因此，我们总结出编写Fixture的套路如下：
+
+1. 对于实例变量，在`@BeforeEach`中初始化，在`@AfterEach`中清理，它们在各个`@Test`方法中互不影响，因为是不同的实例；
+2. 对于静态变量，在`@BeforeAll`中初始化，在`@AfterAll`中清理，它们在各个`@Test`方法中均是唯一实例，会影响各个`@Test`方法
+
+异常捕获，有时我们期待捕获到特定异常情况，使用方法：`assertThrows(IllegalArgumentException,箭头函数);`
+
+
+
+最后，我们讲解一下参数化测试；参数化测试一个最特殊的点在于，每个测试方法都需要传递参数，使用 注解 `@ParameterizedTest`
+
+比如说我们想使用一组值进行测试，我们就可以这样：
+
+```java
+@ParameterizedTest
+@ValueSource(ints = { 0, 1, 5, 100 })
+void testAbs(int x) {
+    assertEquals(x, Math.abs(x));
+}
+```
+
+## 加密与安全
+
+### URL编码
+
+之所以需要URL编码，是因为出于兼容性考虑，很多服务器只识别ASCII字符。但如果URL中包含中文、日文这些非ASCII字符怎么办？不要紧，URL编码有一套规则：
+
+- 如果字符是`A`~`Z`，`a`~`z`，`0`~`9`以及`-`、`_`、`.`、`*`，则保持不变；
+- 如果是其他字符，先转换为UTF-8编码，然后对每个字节以`%XX`表示
+
+就是把字符进行编码表示成 `%xx`格式
+
+```java
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class Main {
+    public static void main(String[] args) {
+        String encoded = URLEncoder.encode("中文!", StandardCharsets.UTF_8);
+        System.out.println(encoded);
+    }
+}
+```
+
+### Base64
+
+与URL编码相反，Base64主要是，对字节码进行编码，表示成 文本格式.
+
+Base64编码可以把任意长度的二进制数据转变为纯文本，且只包含 `A~Z`、`a-z`、`0-9`、`+、/ 、=`，一共65个字符；
+
+原理：把3字节的二进制数据按6bit一组，用4个int整数表示，然后查表，把int整数用索引对应到字符，得到编码后的字符串
+
+举个例子：3个byte数据分别是`e4`、`b8`、`ad`，按6bit分组得到`39`、`0b`、`22`和`2d`：
+
+```
+┌───────────────┬───────────────┬───────────────┐
+│      e4       │      b8       │      ad       │
+└───────────────┴───────────────┴───────────────┘
+┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐
+│1│1│1│0│0│1│0│0│1│0│1│1│1│0│0│0│1│0│1│0│1│1│0│1│
+└─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘
+┌───────────┬───────────┬───────────┬───────────┐
+│    39     │    0b     │    22     │    2d     │
+└───────────┴───────────┴───────────┴───────────┘
+```
+
+因为6位整数的范围总是`0`~`63`，所以，能用64个字符表示：字符`A`~`Z`对应索引`0`~`25`，字符`a`~`z`对应索引`26`~`51`，字符`0`~`9`对应索引`52`~`61`，最后两个索引`62`、`63`分别用字符`+`和`/`表示。
+
+如果输入的`byte[]`数组长度不是3的整数倍肿么办？这种情况下，需要对输入的末尾补一个或两个`0x00`，编码后，在结尾加一个`=`表示补充了1个`0x00`，加两个`=`表示补充了2个`0x00`，解码的时候，去掉末尾补充的一个或两个`0x00`即可
+
+```java
+import Java.util.*;
+
+public class Main{
+    public static void main(){
+        byte[] input = new byte[]{(byte)0xe4,(byte)0xb8};
+        String b64encoded = Base64.getEncoder().encodeToString(input);
+        sout(b64encoded);
+        byte[] out = Base64.getDecoder().decode(b64encoded);
+    }
+}
+```
+
+### Hash
+
+| 算法       | 输出长度（位） | 输出长度（字节） |
+| ---------- | -------------- | ---------------- |
+| MD5        | 128 bits       | 16 bytes         |
+| SHA-1      | 160 bits       | 20 bytes         |
+| RipeMD-160 | 160 bits       | 20 bytes         |
+| SHA-256    | 256 bits       | 32 bytes         |
+| SHA-512    | 512 bits       | 64 bytes         |
+
+Java标准库提供了常用的哈希算法，并且有一套统一的接口。我们以MD5算法为例，看看如何对输入计算哈希：
+
+```java
+improt java.security.MessageDigest;
+import java.util.HexFormat;
+
+public class Main{
+    public static void main(){
+        // 创建一个MessageDiget实例
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        // 反复调用update输出数据
+        md.update("hello".getBytes("UTF-8"));
+        md.update(" world".getBytes("UTF-8"));
+        // 计算结果
+        byte[] result = md.digest(); // 16byte
+        // 转为16进制字符串
+        String hexHash = HexFormat.of().formatHex(result)
+    }
+}
+```
+
+当然 有时候Java标准库并不能提供所有的算法，这时我们可以使用第三方库：`BouncyCastle`；
+
+```xml
+<dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk15on</artifactId>
+    <version>1.70</version>
+</dependency>
+```
+
+Java标准库的security提供了能够使得第三方提供商无缝接入的标准机制：我们要使用`BouncyCastle`提供的某种算法，我峨嵋你首先要把bouncycastle注册一下：
+
+```java
+public class Main{
+    public static void main(){
+        // 注册BounmcyCastle
+        Security.addProvider(new BouncyCaltleProvider());
+        // 正常使用
+        MessageDisget md = MessageDisgest.getInstance("RipeMD160");
+        md.update("123".getBytes("UTF-8"));
+        byte[] result = md.digest();
+    }
+}
+```
+
+### Hmac
+
+如果我们把它看作一个黑盒的话，其实这就和**加盐的hash算法**，是类似的，只是使用到的密钥是绝对保密的；     
+
+- HmacMD5使用的key长度是64字节，更安全；
+- Hmac是标准算法，同样适用于SHA-1等其他哈希算法；
+- Hmac输出和原有的哈希算法长度一致。
+
+注意：为了保证安全，密钥绝对不能我们自己指定，需要使用Java标准库的KeyGenerator生成一个安全随机的key。
+
+```java
+import javax.crypto.*;
+import java.util.HexFormat;
+
+public static void main(){
+    // 获取随机密钥生成器
+    KeyGenerator keyGen = new KeyGenerator.getInstance("HmacMD5");
+    SecretKey key = keyGen.generateKey();
+    // 打印随机生成的key
+    byte[] keyArray = key.getEncoded();
+    // 获取Hmac实例
+    Mac mac = Mac.getInstance("HmacMD5");
+    // 初始化hmac，设置密钥
+    mac.init(key);
+    mac.update("hello world".getBytes("UTF-8"));
+    byte[] res = mac.dofinal();
+    sout(HexFormat.Of().formatHex(res));
+    
+}
+```
+
+验证：
+
+```java
+import javax.crypto.*;
+import javax.crypto.spec.*;
+import java.util.HexFormat;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        byte[] hkey = HexFormat.of().parseHex(
+                "b648ee779d658c420420d86291ec70f5" + 
+                "cf97521c740330972697a8fad0b55f5c" + 
+                "5a7924e4afa99d8c5883e07d7c3f9ed0" + 
+                "76aa544d25ed2f5ceea59dcc122babc8");
+        SecretKey key = new SecretKeySpec(hkey, "HmacMD5");
+        Mac mac = Mac.getInstance("HmacMD5");
+        mac.init(key);
+        mac.update("HelloWorld".getBytes("UTF-8"));
+        byte[] result = mac.doFinal();
+        System.out.println(HexFormat.of().formatHex(result)); // 4af40be7864efaae1473a4c601b650ae
+    }
+}
+```
+
+
+
+### 对称加密
+
+| 算法 | 密钥长度    | 工作模式             | 填充模式                                |
+| ---- | ----------- | -------------------- | --------------------------------------- |
+| DES  | 56/64       | ECB/CBC/PCBC/CTR/... | NoPadding/PKCS5Padding/...              |
+| AES  | 128/192/256 | ECB/CBC/PCBC/CTR/... | NoPadding/PKCS5Padding/PKCS7Padding/... |
+| IDEA | 128         | ECB                  | PKCS5Padding/PKCS7Padding/...           |
+
+AES是目前使用最为广泛的加密算法，`DES`已经不再安全；
+
+```java
+import java.security.*;
+import java.util.Base64;
+
+import javax.crypto.*;
+import javax.crypto.spec.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        // 原文:
+        String message = "Hello, world!";
+        System.out.println("Message: " + message);
+        // 128位密钥 = 16 bytes Key:
+        byte[] key = "1234567890abcdef".getBytes("UTF-8");
+        // 加密:
+        byte[] data = message.getBytes("UTF-8");
+        byte[] encrypted = encrypt(key, data);
+        System.out.println("Encrypted: " + Base64.getEncoder().encodeToString(encrypted));
+        // 解密:
+        byte[] decrypted = decrypt(key, encrypted);
+        System.out.println("Decrypted: " + new String(decrypted, "UTF-8"));
+    }
+
+    // 加密:
+    public static byte[] encrypt(byte[] key, byte[] input) throws GeneralSecurityException {
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        SecretKey keySpec = new SecretKeySpec(key, "AES");
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        return cipher.doFinal(input);
+    }
+
+    // 解密:
+    public static byte[] decrypt(byte[] key, byte[] input) throws GeneralSecurityException {
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        SecretKey keySpec = new SecretKeySpec(key, "AES");
+        cipher.init(Cipher.DECRYPT_MODE, keySpec);
+        return cipher.doFinal(input);
+    }
+}
+```
+
+1. 根据算法名称/工作模式/填充模式获取Cipher实例；
+2. 根据算法名称初始化一个SecretKey实例，密钥必须是指定长度；
+3. 使用SecretKey初始化Cipher实例，并设置加密或解密模式；
+4. 传入明文或密文，获得密文或明文。
+
+ECB模式是最简单的AES加密模式，它只需要一个固定长度的密钥，固定的明文会生成固定的密文，这种一对一的加密方式会导致安全性降低，更好的方式是通过CBC模式，它需要一个随机数作为IV参数，这样对于同一份明文，每次生成的密文都不同：
+
+```java
+ 	import java.security.*;
+import java.util.Base64;
+import javax.crypto.*;
+import javax.crypto.spec.*;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        // 原文:
+        String message = "Hello, world!";
+        System.out.println("Message: " + message);
+        // 256位密钥 = 32 bytes Key:
+        byte[] key = "1234567890abcdef1234567890abcdef".getBytes("UTF-8");
+        // 加密:
+        byte[] data = message.getBytes("UTF-8");
+        byte[] encrypted = encrypt(key, data);
+        System.out.println("Encrypted: " + Base64.getEncoder().encodeToString(encrypted));
+        // 解密:
+        byte[] decrypted = decrypt(key, encrypted);
+        System.out.println("Decrypted: " + new String(decrypted, "UTF-8"));
+    }
+
+    // 加密:
+    public static byte[] encrypt(byte[] key, byte[] input) throws GeneralSecurityException {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        // 将密钥封装成SecretKeySpec对象
+        SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
+        // CBC模式需要生成一个16 bytes的initialization vector:
+        SecureRandom sr = SecureRandom.getInstanceStrong();
+        byte[] iv = sr.generateSeed(16);
+        // 将”安全的随机数“封装成对象
+        IvParameterSpec ivps = new IvParameterSpec(iv);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivps);
+        byte[] data = cipher.doFinal(input);
+        // IV不需要保密，把IV和密文一起返回:
+        return join(iv, data);
+    }
+
+    // 解密:
+    public static byte[] decrypt(byte[] key, byte[] input) throws GeneralSecurityException {
+        // 把input分割成IV和密文:
+        byte[] iv = new byte[16];
+        byte[] data = new byte[input.length - 16];
+        System.arraycopy(input, 0, iv, 0, 16);
+        System.arraycopy(input, 16, data, 0, data.length);
+        // 解密:
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
+        IvParameterSpec ivps = new IvParameterSpec(iv);
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivps);
+        return cipher.doFinal(data);
+    }
+
+    public static byte[] join(byte[] bs1, byte[] bs2) {
+        byte[] r = new byte[bs1.length + bs2.length];
+        System.arraycopy(bs1, 0, r, 0, bs1.length);
+        System.arraycopy(bs2, 0, r, bs1.length, bs2.length);
+        return r;
+    }
+}
+```
+
+### 口令加密算法
+
+我们在日产中使用上一节中的对称加密算法时，不可能输入那么多bit位的密钥key，而是输入十几字符的密码，因此这其中肯定存在某种算法用于将密码转化为安全的密钥，这就是 口令 加密算法（PBE，Password Based Encryption），作用如下：
+
+PBE的作用就是把用户输入的口令和一个安全随机的口令采用杂凑后计算出真正的密钥。以AES密钥为例，我们让用户输入一个口令，然后生成一个随机数，通过PBE算法计算出真正的AES口令，再进行加密，代码如下：
+
+```java
+public class Main {
+    public static void main(String[] args) throws Exception {
+        // 把BouncyCastle作为Provider添加到java.security:
+        Security.addProvider(new BouncyCastleProvider());
+        // 原文:
+        String message = "Hello, world!";
+        // 加密口令:
+        String password = "hello12345";
+        // 16 bytes随机Salt:
+        byte[] salt = SecureRandom.getInstanceStrong().generateSeed(16);
+        System.out.println(HexFormat.of().formatHex(salt));
+        // 加密:
+        byte[] data = message.getBytes("UTF-8");
+        byte[] encrypted = encrypt(password, salt, data);
+        System.out.println("encrypted: " + Base64.getEncoder().encodeToString(encrypted));
+        // 解密:
+        byte[] decrypted = decrypt(password, salt, encrypted);
+        System.out.println("decrypted: " + new String(decrypted, "UTF-8"));
+    }
+
+    // 加密:
+    public static byte[] encrypt(String password, byte[] salt, byte[] input) throws GeneralSecurityException {
+        PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray());
+        SecretKeyFactory skeyFactory = SecretKeyFactory.getInstance("PBEwithSHA1and128bitAES-CBC-BC");
+        SecretKey skey = skeyFactory.generateSecret(keySpec);
+        PBEParameterSpec pbeps = new PBEParameterSpec(salt, 1000);
+        Cipher cipher = Cipher.getInstance("PBEwithSHA1and128bitAES-CBC-BC");
+        cipher.init(Cipher.ENCRYPT_MODE, skey, pbeps);
+        return cipher.doFinal(input);
+    }
+
+    // 解密:
+    public static byte[] decrypt(String password, byte[] salt, byte[] input) throws GeneralSecurityException {
+        PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray());
+        SecretKeyFactory skeyFactory = SecretKeyFactory.getInstance("PBEwithSHA1and128bitAES-CBC-BC");
+        SecretKey skey = skeyFactory.generateSecret(keySpec);
+        PBEParameterSpec pbeps = new PBEParameterSpec(salt, 1000);
+        Cipher cipher = Cipher.getInstance("PBEwithSHA1and128bitAES-CBC-BC");
+        cipher.init(Cipher.DECRYPT_MODE, skey, pbeps);
+        return cipher.doFinal(input);
+    }
+}
+```
+
+使用PBE时，我们还需要引入BouncyCastle，并指定算法是`PBEwithSHA1and128bitAES-CBC-BC`。观察代码，实际上真正的AES密钥是调用`Cipher`的`init()`方法时同时传入`SecretKey`和`PBEParameterSpec`实现的。在创建`PBEParameterSpec`的时候，我们还指定了循环次数`1000`，循环次数越多，暴力破解需要的计算量就越大。
+
+如果我们把salt和循环次数固定，就得到了一个通用的“口令”加密软件。如果我们把随机生成的salt存储在U盘，就得到了一个“口令”加USB Key的加密软件，它的好处在于，即使用户使用了一个非常弱的口令，没有USB Key仍然无法解密，因为USB Key存储的随机数密钥安全性非常高。
+
+### 密钥交换算法
+
+### 非对称加密算法
+
+实际中公钥加密使用最为广泛的就是加密对称密钥。使得双方接下来使用对称加密进行通信。
+
+Java标准库提供了标准的RSA算法实现，如下：
+
+```java
+@Test
+public void testRSA() throws Exception {
+    byte[] plainText = "Hello, world!".getBytes("UTF-8");
+    RSA rsa = new RSA();
+    // 加密
+    byte[] cipherText = rsa.encrypt(plainText);
+    // 解密
+    byte[] plainText2 = rsa.decrypt(cipherText);
+    System.out.println(new String(plainText2,"UTF-8"));
+
+}
+class RSA{
+    PrivateKey sk;
+    PublicKey pk;
+    public RSA() throws Exception{
+        // 创建密钥生成器
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA");
+        // 初始化密钥长度
+        kpGen.initialize(1024);
+        // 生成密钥
+        KeyPair kp = kpGen.generateKeyPair();
+        // 赋值
+        this.sk = kp.getPrivate();
+        this.pk = kp.getPublic();
+    }
+    public RSA(byte[] sk, byte[] pk) throws Exception{
+        // 创建私钥
+        this.sk = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(sk));
+        // 创建公钥
+        this.pk = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pk));
+    }
+    // 私钥导出字节
+    public byte[] getPrivateKey(){
+        return sk.getEncoded();
+    }
+    // 公钥导出字节
+    public byte[] getPublicKey(){
+        return pk.getEncoded();
+    }
+
+    // 加密
+    public byte[] encrypt(byte[] plainText) throws Exception{
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, this.pk);
+        return cipher.doFinal(plainText);
+    }
+    // 解密
+    public byte[] decrypt(byte[] cipherText) throws Exception{
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE,this.sk);
+        return cipher.doFinal(cipherText);
+    }
+}
+```
+
+
+
+### 签名算法
+
+```plain
+// 加密
+signature = encrypt(privateKey, sha256(message))
+// 解密
+hash = decrypt(publicKey, signature)
+```
+
+常用的非对称算法就是RSA，常用的Hash算法就是 MD5、SHA1、SHA256；
+
+```java
+public class Main {
+    public static void main(String[] args) throws GeneralSecurityException {
+        // 生成RSA公钥/私钥:
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA");
+        kpGen.initialize(1024);
+        KeyPair kp = kpGen.generateKeyPair();
+        PrivateKey sk = kp.getPrivate();
+        PublicKey pk = kp.getPublic();
+
+        // 待签名的消息:
+        byte[] message = "Hello, I am Bob!".getBytes(StandardCharsets.UTF_8);
+
+        // 用私钥签名:
+        Signature s = Signature.getInstance("SHA1withRSA");
+        s.initSign(sk);
+        s.update(message);
+        byte[] signed = s.sign();
+        System.out.println("signature: " + HexFormat.of().formatHex(signed));
+
+        // 用公钥验证:
+        Signature v = Signature.getInstance("SHA1withRSA");
+        v.initVerify(pk);
+        v.update(message);
+        boolean valid = v.verify(signed);
+        System.out.println("valid? " + valid);
+    }
+}
+```
+
+
+
+### 数字证书
+
+数字证书就是集合了多种密码学算法，用于实现数据加解密、身份认证、签名等多种功能的一种安全标准。
+
+数字证书可以防止中间人攻击，因为它采用链式签名认证，即通过根证书（Root CA）去签名下一级证书，这样层层签名，直到最终的用户证书。而Root CA证书内置于操作系统中，所以，任何经过CA认证的数字证书都可以对其本身进行校验，确保证书本身不是伪造的。
+
+数字证书有多种文件编码格式，主要包含CER编码、DER编码等：
+
++ CER（Canonical Encoding Rules，规范编码格式）：它是BER（Basic Encoding Rules，基本编码格式）的一个变种，比BER规定得更严格。、
++ DER（Distinguished Encoding Rule，卓越编码格式）：同样是BER的一个变种，与CER的不同之处在于：DER使用定长模式，而CER使用变长模式。
+
+所有证书都符合 PKI（公钥基础设施）制定的 x.509标准；这一切规则还不够，在实际操作中对PKI体系进行加密、解密、签名、密钥交换、分发格式等操作时，须指定相应的标准，即 `PKCS（public-key Cryptography Standards），公钥加密标准`，是由 RSA实验室 和其他安全系统开发商为促进公钥密码的发展而制定的一系列标准。其中包括证书申请、证书更新、证书作废表发布、扩展证书内容以及数字签名、数字信封的格式等方面的一系列相关协议
+
+| 公钥加密标准 | 描述信息             | 文件名后缀       |
+| ------------ | -------------------- | ---------------- |
+| PKCS#7       | 密码消息语法标准     | .p7b、.p7c、.spc |
+| PKCS#10      | 证书请求语法标准     | .p10、.csr       |
+| PKCS#12      | 个人信息交换语法标准 | .p12、.pfx       |
+
+以上标准主要用于证书的申请和更新等操作，例如，PKCS#10文件用于证书签发申请，PKCS#12文件可作为Java中的密钥库或信任库直接使用。
+
+可以通过KeyTool和OpenSSL生成数字证书，并由此产生响应的密钥库文件或信任库文件。目前主要有JKS和PEM两种编码格式文件：
+
++ JKS（Java Key Store）：Java原生的密钥库/信任库文件。
++ PEM（Privacy Enbanced Mail，隐私增强邮件）：使用多种加密方法提供机密性，认证和信息完整性的因特网电子有邮件，在因特网中却没有被广泛配置，但在OpenSSL中，却是最为常见的密钥库文件。
+
+
+
+
+
+=================================================================================
+
+我们得了解一下什么是密钥库：密钥库`keystore`是存储一个或多个密钥条目的文件，每个密钥条目以一个别名标识，它包含密钥和证书相关信息。可以使用java自带工具keytool生成，也可以通过程序编码实现，它通常是一个文件。密钥库比较常用的文件格式为 `jks`和 `pkcs12`：
+
+| 格式   | 扩展名    | 描述                                | 特点                                                   |
+| ------ | --------- | ----------------------------------- | ------------------------------------------------------ |
+| JKS    | .jks/.ks  | 密钥库的Java实现版本，provider为SUN | 密钥库和私钥用不同的密码进行保护                       |
+| PKCS12 | .p12/.pfx | 个人信息交换语法标准                | 包含私钥、公钥及其证书，密钥库和私钥用相同密码进行保护 |
+
+我们可以使用Java自带工具生成密钥库：
+
+> keytool -genkeypair -alias fire -storetype PKCS12  -keyalg RSA -keystore fire.pkcs12 -storepass 13987664391 -validity 3650 -keysize 2048 
+
+![image-20241009115731486](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-eb97733b231f48684a4c4a20733c3776.png)
+
+我们在Java代码中可以对 密钥库`keystore`做非常多的操作，例如：**生成密钥库**、**从密钥库提取私钥和证书**、**从证书中提取BASE64编码**、提取密钥对并生成公钥私钥；具体操作https://www.cnblogs.com/asker009/p/14325752.html查看，在java中我们能直接操作 `keystore`文件或者  `证书文件`；
+
+```java
+public class CertificateCoder {
+
+    //证书类型X.509
+    public static final String CERT_TYPE = "X.509";
+
+    /**
+     * 获得KeyStore
+     * @param keyStorePath 密钥库路径
+     * @param password 密码
+     * @return KeyStore 密钥库
+     * @throws Exception
+     */
+    private static KeyStore getKeyStore(String keyStorePath, String password) throws Exception {
+        //实例化密钥库
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        //获得密钥库文件流
+        FileInputStream is = new FileInputStream(keyStorePath);
+        //加载密钥库
+        ks.load(is, password.toCharArray());
+        //关闭密钥库文件流
+        is.close();
+        return ks;
+    }
+
+    /**
+     * 获取证书
+     * @param certificatePath 证书路径
+     * @return Certificate 证书
+     * @throws Exception
+     */
+    private static Certificate getCertificate(String certificatePath) throws Exception {
+        //实例化证书工厂
+        CertificateFactory certificateFactory = CertificateFactory.getInstance(CERT_TYPE);
+        //获得证书文件流
+        FileInputStream in = new FileInputStream(certificatePath);
+        //生成证书
+        Certificate certificate = certificateFactory.generateCertificate(in);
+        //关闭证书文件流
+        in.close();
+        return certificate;
+    }
+
+    /**
+     * 获取证书
+     * @param keyStorePath 密钥库路径
+     * @param alias 别名
+     * @param password 密码
+     * @return Certificate 证书
+     * @throws Exception
+     */
+    private static Certificate getCertificate(String keyStorePath, String alias, String password) throws Exception {
+        //获得密钥库
+        KeyStore keyStore = getKeyStore(keyStorePath, password);
+        //获得证书
+        return keyStore.getCertificate(alias);
+    }
+
+    /**
+     * 由KeyStore获取私钥
+     * @param keyStorePath 密钥库路径
+     * @param alias 别名
+     * @param password 密码
+     * @return PrivateKey 私钥
+     * @throws Exception
+     */
+    private static PrivateKey getPrivateKeyByKeyStore(String keyStorePath, String alias, String password) throws Exception {
+        //获得密钥库
+        KeyStore ks = getKeyStore(keyStorePath, password);
+        //获得私钥
+        return (PrivateKey) ks.getKey(alias, password.toCharArray());
+    }
+
+    /**
+     * 由Certificate获得公钥
+     * @param certificatePath 证书路径
+     * @return PublicKey 公钥
+     * @throws Exception
+     */
+    private static PublicKey getPublicKeyByCertificate(String certificatePath) throws Exception {
+        //获取证书
+        Certificate certificate = getCertificate(certificatePath);
+        //获得公钥
+        return  certificate.getPublicKey();
+    }
+
+    /**
+     * 私钥加密
+     * @param data 待加密数据
+     * @param keyStorePath 密钥库路径
+     * @param alias 别名
+     * @param password 密码
+     * @return byte[] 解密后的数据
+     * @throws Exception
+     */
+    public static byte[] encryptByPrivateKey(byte[] data, String keyStorePath, String alias, String password) throws Exception {
+        //获取私钥
+        PrivateKey privateKey = getPrivateKeyByKeyStore(keyStorePath, alias, password);
+        //对数据加密
+        Cipher cipher = Cipher.getInstance(privateKey.getAlgorithm());
+        cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+        return cipher.doFinal(data);
+    }
+
+    /**
+     * 私钥解密
+     * @param data 待解密数据
+     * @param keyStorePath 密钥库路径
+     * @param alias 别名
+     * @param password 密码
+     * @return byte[] 解密后的数据
+     * @throws Exception
+     */
+    public static byte[] decryptByPrivateKey(byte[] data, String keyStorePath, String alias, String password) throws Exception {
+        //获取私钥
+        PrivateKey privateKey = getPrivateKeyByKeyStore(keyStorePath, alias, password);
+        //对数据解密
+        Cipher cipher = Cipher.getInstance(privateKey.getAlgorithm());
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        return cipher.doFinal(data);
+    }
+
+    /**
+     * 公钥加密
+     * @param data 待加密数据
+     * @param certificatePath 证书路径
+     * @return byte[] 加密后的数据
+     * @throws Exception
+     */
+    public static byte[] encryptByPublicKey(byte[] data, String certificatePath) throws Exception {
+        //获取公钥
+        PublicKey publicKey = getPublicKeyByCertificate(certificatePath);
+        //对数据加密
+        Cipher cipher = Cipher.getInstance(publicKey.getAlgorithm());
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        return cipher.doFinal(data);
+    }
+
+    /**
+     * 公钥解密
+     * @param data 待解密数据
+     * @param certficatePath 证书路径
+     * @return byte[] 解密后的数据
+     * @throws Exception
+     */
+    public static byte[] decryptByPublicKey(byte[] data, String certficatePath) throws Exception {
+        //获取公钥
+        PublicKey publicKey = getPublicKeyByCertificate(certficatePath);
+        //对数据加密
+        Cipher cipher = Cipher.getInstance(publicKey.getAlgorithm());
+        cipher.init(Cipher.DECRYPT_MODE, publicKey);
+        return cipher.doFinal(data);
+    }
+
+    /**
+     * 签名
+     * @param sign 数据
+     * @param keyStorePath 密钥库路径
+     * @param alias 别名
+     * @param password 密码
+     * @return byte[] 签名
+     * @throws Exception
+     */
+    public static byte[] sign(byte[] sign, String keyStorePath, String alias, String password) throws Exception {
+        //获取证书
+        X509Certificate x509Certificate = (X509Certificate) getCertificate(keyStorePath, alias, password);
+        //构建签名，由证书指定签名算法
+        Signature signature = Signature.getInstance(x509Certificate.getSigAlgName());
+        //获取私钥
+        PrivateKey privateKey = getPrivateKeyByKeyStore(keyStorePath, alias, password);
+        //初始化签名，由私钥构建
+        signature.initSign(privateKey);
+        signature.update(sign);
+        return signature.sign();
+    }
+
+    /**
+     * 验证签名
+     * @param data 数据
+     * @param sign 签名
+     * @param certificatePath 证书路径
+     * @return boolean 验证通过为真
+     * @throws Exception
+     */
+    public static boolean verify(byte[] data, byte[] sign, String certificatePath) throws Exception {
+        //获得证书
+        X509Certificate x509Certificate = (X509Certificate) getCertificate(certificatePath);
+        //由证书构建签名
+        Signature signature = Signature.getInstance(x509Certificate.getSigAlgName());
+        //由证书初始化签名，实际上是使用了证书中的公钥
+        signature.initVerify(x509Certificate);
+        signature.update(data);
+        return signature.verify(sign);
+    }
+
+
+
+    public static void main(String[] args) throws Exception{
+        String str = "hello world";
+
+        System.out.println("******************公钥加密私钥解密****************");
+        byte[] encryptByPublicKey = encryptByPublicKey(str.getBytes(), "jks/acton.cer");
+        System.out.println("公钥加密后的数据：" + HexUtil.encodeHexStr(encryptByPublicKey));
+        byte[] decryptByPrivateKey = decryptByPrivateKey(encryptByPublicKey, "jks/acton.keystore", "acton", "123456");
+        System.out.println("私钥解密后的数据：" + new String(decryptByPrivateKey));
+
+        System.out.println("******************私钥加密公钥解密****************");
+        byte[] encryptByPrivateKey = encryptByPrivateKey(str.getBytes(), "jks/acton.keystore", "acton", "123456");
+        System.out.println("私钥加密后的数据：" + HexUtil.encodeHexStr(encryptByPrivateKey));
+        byte[] decryptByPublicKey = decryptByPublicKey(encryptByPrivateKey, "jks/acton.cer");
+        System.out.println("公钥解密后的数据：" + new String(decryptByPrivateKey));
+
+        System.out.println("******************签名和验签****************");
+        byte[] sign = sign(str.getBytes(), "jks/acton.keystore", "acton", "123456");
+        System.out.println("签名后的数据：" + HexUtil.encodeHexStr(sign));
+        boolean success = verify(str.getBytes(), sign, "jks/acton.cer");
+        System.out.println("验签后的结果：" + success);
+
+    }
+}
+
+```
+
+
+
+### java.security
+
++ MessageDigest主要用来进行hash值计算
++ Signature主要用来生成与验证数字签名
++ KeyPair：生成与保存密钥对
++ KeyFactory：用于将密钥规范（key specification）转换为密钥对象，也可用于将密钥对象转换为密钥规范。
++ KeyStore：用于存储和管理密钥、证书和私钥
++ `SecureRandom` ：用于生成安全的随机数，特别是在加密操作中，安全的随机数对生成密钥、初始化向量（IV）等至关重要
++ `Certificate`：
+
+### javax.crypto         
+
++  `Cipher`：封装了加密和解密算法
+
+    加密 (`doFinal` 方法)
+
+    解密 (`doFinal` 方法)
+
+    初始化加密模式 (`init` 方法)
+
+    支持分组密码块模式和填充模式
+
++ `SecretKey`：各种非公钥加密密钥的实例
+
++ `KeyGenerator`：生成`SecretKey`
+
++ `Mac`：用于生成各种消息认证码，`HmacSHA256`
+
++ `KeyAgreement`：实现 Diffie-Hellman 等密钥协商算法
+
++ `CipherInputStream` 和 `CipherOutputStream`：用于加密解密流
+
+
+
+另外："Spec" 是 "Specification" 的缩写，通常指的是一组标准、协议、规范或文档，详细描述系统、软件、硬件、接口或其他技术组件的行为、功能或特性。它通常被用作开发或实现某项技术的基础，确保不同的实现能够互相兼容或遵循相同的规则。
+
+## Maven学习
+
+最重要的就是 `pom.xml`文件，
+
+其中，`groupId`类似于Java的包名，通常是公司或组织名称，`artifactId`通常是项目名称，再加上`version`，一个Maven工程就是由`groupId`，`artifactId`和`version`作为唯一标识
+
+| scope    | 说明                                          | 示例            |
+| -------- | --------------------------------------------- | --------------- |
+| compile  | 编译时需要用到该jar包（默认）                 | commons-logging |
+| test     | 编译Test时需要用到该jar包                     | junit           |
+| runtime  | 编译时不需要，但运行时需要用到                | mysql驱动       |
+| provided | 编译时需要用到，但运行时由JDK或某个服务器提供 | servlet-api     |
+
+### lifecycle、phase、goal
+
+Maven不但有标准化的项目结构，而且还有一套标准化的构建流程，可以自动化实现**编译**，**打包**，**发布**，等等。
+
+Maven的生命周期有一系列阶段（phase）构成，以内置的生命周期为例，主要有以下`phase`：
+
+<img src="https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-dd3c3902875995a9eb6dc1168f847744.png" alt="image-20241009124706555" style="zoom: 67%;" />
+
+如果我们执行 `mvn package`，Maven就会执行`default`生命周期，它会从开始一直运行到`package`这个phase为止。
+
+在实际开发过程中，经常使用的命令有：
+
+`mvn clean`：清理所有生成的class和jar；
+
+`mvn clean compile`：先清理，再执行到`compile`；
+
+`mvn clean test`：先清理，再执行到`test`，因为执行`test`前必须执行`compile`，所以这里不必指定`compile`；
+
+`mvn clean package`：先清理，再执行到`package`。
+
+大多数phase在执行过程中，因为我们通常没有在`pom.xml`中配置相关的设置，所以这些phase什么事情都不做。
+
+### 插件
+
+实际上，执行每个phase，都是通过某个插件（plugin）来执行的，Maven本身其实并不知道如何执行`compile`，它只是负责找到对应的`compiler`插件，然后执行默认的`compiler:compile`这个goal来完成编译。
+
+所以，使用Maven，实际上就是配置好需要使用的插件，然后通过phase调用它们。
+
+Maven已经内置了一些常用的标准插件：
+
+| 插件名称 | 对应执行的phase |
+| -------- | --------------- |
+| clean    | clean           |
+| compiler | compile         |
+| surefire | test            |
+| jar      | package         |
+
+如果标准插件无法满足需求，我们还可以自定义插件，我们需要在 `pom.xml`文件中声明它：
+
+下面这个插件可以：打包所有依赖包并生成可执行jar；
+
+```xml
+<project>
+    ...
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+                                <transformers>
+                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <mainClass>com.itranswarp.learnjava.Main</mainClass>
+                                    </transformer>
+                                </transformers>
+                          </configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+```
+
+有一些好用的第三方插件，需要我们自己发现。
+
+## 函数式编程
+
+### lambda表达式
+
+<img src="https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-1820d35540778664fbd8fdd65ccb18fa.png" alt="image-20241009130200761" style="zoom:80%;" />
+
+`chatgpt`给出的例子就非常形象了，我只负责告诉你我是干嘛的，我不告诉你具体我是怎么干的。
+
+函数式编程最早是数学家[阿隆佐·邱奇](https://zh.wikipedia.org/wiki/阿隆佐·邱奇)研究的一套函数变换逻辑，又称Lambda Calculus（λ-Calculus），所以也经常把函数式编程称为Lambda计算。
+
+以 `Comparator`为例，其是一个**单方法接口**，并且其可以作为 `Arrays.sort()`的参数传进去，即传入一个`Comparator`实例，以匿名类方法编写如下：
+
+```java
+String[] array = xxx;
+Arrays.sort(array,new Comparator<String>{
+    public int compare(String s1,String s2){
+        return s1.compareTo(s2);
+    }
+});
+```
+
+从`Java8`开始，我们可以使用`Lambda`表达式来替代但方法接口，改进代码如下：
+
+```java
+String[] array = xxx;
+Arrays.sort(array,(s2,s2)->{
+    return s1.compareTo(s2);
+});
+```
+
+观察Lambda表达式的写法，它只需要写出方法定义：
+
+```java
+(s1, s2) -> {
+    return s1.compareTo(s2);
+}
+```
+
+其中，参数是`(s1, s2)`，参数类型可以省略，因为编译器可以自动推断出`String`类型。`-> { ... }`表示方法体，所有代码写在内部即可。Lambda表达式没有`class`定义，因此写法非常简洁。
+
+如果只有一行`return xxx`的代码，完全可以用更简单的写法：
+
+```java
+Arrays.sort(array, (s1, s2) -> s1.compareTo(s2));
+```
+
+返回值的类型也是由编译器自动推断的，这里推断出的返回值是`int`，因此，只要返回`int`，编译器就不会报错。
+
+方法接口 ：functionalInterfate，我们把只定义了单方法的接口称之为`FunctionalInterface`，用注解`@FunctionalInterface`标记。例如，`Callable`接口：
+
+```java
+@FunctionalInterface
+public interface Callable<V> {
+    V call() throws Exception;
+}
+```
+
+### 函数式接口
+
+使用Lambda表达式，可以轻易的替代 函数接口的实现，从而简化代码，实际上，除了Lambda表达式，我们还可以直接传入方法引用。例如：
+
+```java
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        String[] array = new String[] { "Apple", "Orange", "Banana", "Lemon" };
+        Arrays.sort(array, Main::cmp);
+        System.out.println(String.join(", ", array));
+    }
+
+    static int cmp(String s1, String s2) {
+        return s1.compareTo(s2);
+    }
+}
+```
+
+上述代码在`Arrays.sort()`中直接传入了静态方法`cmp`的引用，用`Main::cmp`表示。
+
+因此，所谓方法引用，是指如果某个方法签名和接口恰好一致，就可以直接传入方法引用。
+
+因为`Comparator<String>`接口定义的方法是`int compare(String, String)`，和静态方法`int cmp(String, String)`相比，除了方法名外，方法参数一致，返回类型相同，因此，我们说两者的方法签名一致，可以直接把方法名作为Lambda表达式传入：
+
+> Arrays.sort(array, Main::cmp);
+
+注意：在这里，方法签名只看参数类型和返回类型，不看方法名称，也不看类的继承关系。
+
+我们再看看如何引用实例方法。如果我们把代码改写如下：
+
+```java
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        String[] array = new String[] { "Apple", "Orange", "Banana", "Lemon" };
+        Arrays.sort(array, String::compareTo);
+        System.out.println(String.join(", ", array));
+    }
+}
+```
+
+不但可以编译通过，而且运行结果也是一样的，这说明`String.compareTo()`方法也符合Lambda定义。
+
+观察`String.compareTo()`的方法定义：
+
+```java
+public final class String {
+    public int compareTo(String o) {
+        ...
+    }
+}
+```
+
+这个方法的签名只有一个参数，为什么和`int Comparator<String>.compare(String, String)`能匹配呢？
+
+因为实例方法有一个隐含的`this`参数，`String`类的`compareTo()`方法在实际调用的时候，第一个隐含参数总是传入`this`，相当于静态方法：
+
+```java
+public static int compareTo(String this, String o);
+```
+
+所以，`String.compareTo()`方法也可作为方法引用传入。
+
+### 使用stream
+
+java 8 API添加了一个新的抽象称为流Stream，可以让你以一种声明的方式处理数据。
+
+Stream 使用一种类似用 SQL 语句从数据库查询数据的直观方式来提供一种对 Java 集合运算和表达的高阶抽象。
+
+Stream API可以极大提高Java程序员的生产力，让程序员写出高效率、干净、简洁的代码。
+
+这种风格将要处理的元素集合看作一种流， 流在管道中传输， 并且可以在管道的节点上进行处理， 比如筛选， 排序，聚合等。
+
+元素流在管道中经过中间操作（intermediate operation）的处理，最后由最终操作(terminal operation)得到前面处理的结果。
+
+```
++--------------------+       +------+   +------+   +---+   +-------+
+| stream of elements +-----> |filter+-> |sorted+-> |map+-> |collect|
++--------------------+       +------+   +------+   +---+   +-------+
+```
+
+一个简单的例子：
+
+```java
+List<Integer> transactionsIds = 
+widgets.stream()
+             .filter(b -> b.getColor() == RED)
+             .sorted((x,y) -> x.getWeight() - y.getWeight())
+             .mapToInt(Widget::getWeight)
+             .sum();
+
+```
+
+
+
+说白了 Stream 就是来源于 数据源的元素队列并支持聚合操作：
+
++ 元素是特定类型的对象，形成一个队列，Stream并不会存储元素，而是按需计算
++ 数据流的来源，可以是 **集合、数组、I/O channel等**
++ 聚合操作类似于sql语句一样的操作，比如 filter、map、reduce、find、match、sorted等；
+
+和以前的Collection操作不同， Stream操作还有两个基础的特征：
+
+- **Pipelining**: 中间操作都会返回流对象本身。 这样多个操作可以串联成一个管道， 如同流式风格（fluent style）。 这样做可以对操作进行优化， 比如延迟执行(laziness)和短路( short-circuiting)。
+- **内部迭代**： 以前对集合遍历都是通过Iterator或者For-Each的方式, 显式的在集合外部进行迭代， 这叫做外部迭代。 Stream提供了内部迭代的方式， 通过访问者模式(Visitor)实现。
+
+如何生成流Stream呢？
+
+集合接口提供了新的方法 `stream`为集合创建串行流：
+
+```java
+// 基于数组
+Arrays.stream(new String[]{"a","b","c"});
+// 基于集合
+List<String> strings = Arrays.asList("abc","bbb","ccc");
+List<String> filteredString = strings.stream().filter(string - > !string.isEmpty()).collect(Clooectors.toList()); 
+```
+
+某些时候我们可以直接通过某些API直接获取`Stream`：
+
+例如，`Files`类的`lines()`方法可以把一个文件变成一个`Stream`，每个元素代表文件的一行内容：
+
+```java
+try (Stream<String> lines = Files.lines(Paths.get("/path/to/file.txt"))) {
+    ...
+}
+```
+
+此方法对于按行遍历文本文件十分有用。
+
+另外，正则表达式的`Pattern`对象有一个`splitAsStream()`方法，可以直接把一个长字符串分割成`Stream`序列而不是数组：
+
+```java
+Pattern p = Pattern.compile("\\s+");
+Stream<String> s = p.splitAsStream("The quick brown fox jumps over the lazy dog");
+s.forEach(System.out::println);
+```
+
+
+
+
+
++ forEach ：用于迭代流中的每一个数据，参数为一个函数，可以是函数式接口
++ map：用于映射每个元素到对应的结果，参数也为一个函数式接口
++ filter：用于通过设置特定的条件过滤元素
++ limit：用于获取指定数量的流（获取指定数量的元素）
++ sorted：对流进行排序
++ distinct：去重
++ skp：丢弃前几个元素，配合limit实现截取
++ 
+
+collectors类实现了很多的规约操作，例如将流转化成集合和聚合元素。Collectors可用于返回集合或者字符串：
+
+```java
+List<String> strings = xxx;
+List<String> filteredStrings = strings.stream().filter(x -> !x.isEmpty()).collect(Collect(Collectors.toList()));
+
+// 转化为集合
+System.out.println("筛选列表: " + filtered);
+// 转化为字符串
+String mergedString = strings.stream().filter(string -> !string.isEmpty()).collect(Collectors.joining(", "));
+System.out.println("合并字符串: " + mergedString);
+```
+
+## JavaEE web开发
+
+JavaEE是Java Platform Enterprise Edition的缩写，即Java企业平台。我们前面介绍的所有基于标准JDK的开发都是JavaSE，即Java Platform Standard Edition；由于Oracle将JavaEE移交给[Eclipse](https://www.eclipse.org/)开源组织时，不允许他们继续使用Java商标，所以JavaEE再次改名为[Jakarta EE](https://jakarta.ee/)。因为这个拼写比较复杂而且难记，所以我们后面还是用JavaEE这个缩写。
+
+
+
+JavaEE最核心的组件就是**基于Servlet标准的Web服务器**，开发者编写的应用程序是基于Servlet API并运行在Web服务器内部的：
+
+我们在JavaEE平台开发一个web项目时，处理TCP链接、解析HTTP协议这些底层工作统统交给web服务器去做，我们程序员所要做的就是使用javaEE提供的**ServletAPI**来开发，这些API由jakarta.servlet-api提供。
+
+自定义一个`Servlet`：
+
+```java
+// WebServlet注解表示这是一个Servlet，并映射到地址/:
+@WebServlet(urlPatterns = "/")
+public class HelloServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        // 设置响应类型:
+        resp.setContentType("text/html");
+        // 获取输出流:
+        PrintWriter pw = resp.getWriter();
+        // 写入响应:
+        pw.write("<h1>Hello, world!</h1>");
+        // 最后不要忘记flush强制输出:
+        pw.flush();
+    }
+}
+```
+
+一个Servlet总是继承自`HttpServlet`，然后覆写`doGet()`或`doPost()`方法。注意到`doGet()`方法传入了`HttpServletRequest`和`HttpServletResponse`两个对象，分别代表HTTP请求和响应。我们使用Servlet API时，并不直接与底层TCP交互，也不需要解析HTTP协议，因为`HttpServletRequest`和`HttpServletResponse`就已经封装好了请求和响应。以发送响应为例，我们只需要设置正确的响应类型，然后获取`PrintWriter`，写入响应即可。
+
+**由于一个web服务器允许同时运行多个WebAPP**，因此还需要第一级目录用于区分不同webapp，上述访问规则为： `localhost:8080/hello/`；当然也可以不要第一级目录，需要满足条件1.只有一个webapp，webapp命名为**ROOT.war**;由Tomcat负责加载我们的`.war`文件，并创建一个`HelloServlet`实例，最后以多线程的模式来处理HTTP请求。如果Tomcat服务器收到的请求路径是`/`（假定部署文件为ROOT.war），就转发到`HelloServlet`并传入`HttpServletRequest`和`HttpServletResponse`两个对象。
+
+对于Tomcat这种web servlet容器来说，采用线程池来处理各种请求，因此如果使用了`ThreadLocal`，但没有清理，那么它的状态很可能会影响到下次的某个请求，因为Servlet容器很可能用线程池实现线程复用。
+
+因此web应用程序的开发流程如下：
+
+1. 编写Servlet；
+2. 打包为war文件；
+3. 复制到Tomcat的webapps目录下；
+4. 启动Tomcat。
+
+本质上 Tomcat也是Java程序，他的功能为加载war包并初始化Servlet，如何把Tomcat看成一个Jar包，我们自己编写一个main方法，创建Tomcat实例并初始化加载war包，让他加载war包即可，因此有了 `tomcat-embed-core`（嵌入式Tomcat）；
+
+
+
+因为HTTP协议是一个**无状态协议**，即Web应用程序无法区分收到的两个HTTP请求是否是同一个浏览器发出的。为了跟踪用户状态，服务器可以向浏览器分配一个唯一ID，并以Cookie的形式发送到浏览器，浏览器在后续访问时总是附带此Cookie，这样，服务器就可以识别用户身份。
+
+JavaEE的Servlet机制内建了对Session的支持；实际上，Servlet提供的`HttpSession`本质上就是通过一个名为`JSESSIONID`的Cookie来跟踪用户会话的。除了这个名称外，其他名称的Cookie我们可以任意使用；读取Cookie主要依靠遍历`HttpServletRequest`附带的所有Cookie；
+
+
+
+JSP（Java server Pages），文件必须放置到 /src/main/webapp下，以jsp结尾，就是可以插入动态数据的html；
+
+
+
+最原始 的 `MVC`框架如下：
+
+![image-20241011194305858](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-732afa87d5328e6d945b9991bed0d04b.png)
+
+我们需要在MVC框架中创建一个**接收所有请求**的`Servlet`，通常我们把它命名为`DispatcherServlet`，它总是映射到`/`，然后，根据不同的Controller的方法定义的`@Get`或`@Post`的Path决定调用哪个方法，最后，获得方法返回的`ModelAndView`后，渲染模板，写入`HttpServletResponse`，即完成了整个MVC的处理。（！！！只需要一个接收所有请求的`Servlet`）（这也就解释了为什么后面的 SpringMVC也是一个Servlet）；
+
+如果多个Servlet有共同的逻辑，我们可以把这些逻辑抽离出来，使用Servlet规范提供的`Filter`组件来实现，它的作用是 **在请求到达Servlet之前**，可以被多个`Filter`预处理，类似下面这个图：![image-20241011195546837](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-739ccb83d4764c45084db4d47dbe594d.png)
+
+
+
+
+
+除了`Servlet`和`Filter`这两个组件之外，Servelt规范还提供了第三种组件：`Listener`监听器，有好几种`Listener`，最常用的就是 `ServeltContextListener`，
+
+```java
+@WebListener
+public class AppListener implements ServletContextListener {
+    // 在此初始化WebApp,例如打开数据库连接池等:
+    public void contextInitialized(ServletContextEvent sce) {
+        System.out.println("WebApp initialized.");
+    }
+
+    // 在此清理WebApp,例如关闭数据库连接池等:
+    public void contextDestroyed(ServletContextEvent sce) {
+        System.out.println("WebApp destroyed.");
+    }
+}
+```
+
+任何标注为`@WebListener`，且实现了特定接口的类会被Web服务器自动初始化。上述`AppListener`实现了`ServletContextListener`接口，它会在整个Web应用程序初始化完成后，以及Web应用程序关闭后获得回调通知。我们可以把初始化数据库连接池等工作放到`contextInitialized()`回调方法中，把清理资源的工作放到`contextDestroyed()`回调方法中，因为Web服务器保证在`contextInitialized()`执行后，才会接受用户的HTTP请求。
+
+除了数据库连接池，还有很多其他第三方框架喜欢实现`ServletContextListener`来注册销毁自己的服务；
 
 
 
@@ -1259,7 +2719,7 @@ public static void main(String[] args) throws Exception {
 7. 常用对象类型（如 `BigDecimal`、`UUID`）的转换
 8. 当导入jackson时，还支持各种复杂对象的转换
 
-
+这里说明一下，当**SpringBoot**导入**jackson-databind**时，由于自动配置机制，会自动生成 `MappingJackson2HttpMesssageConvert`组件，用于进行Http请求或者响应中的Java对象与JSON数据的转化；
 
 ### 接收请求参数所有方式总结
 
@@ -1418,7 +2878,10 @@ public void addCorsMappings(CorsRegistry registry) {
 
 这种线程模型非常重要，因为Spring的JDBC事务是基于`ThreadLocal`实现的，如果在处理过程中，一会由线程A处理，一会又由线程B处理，那事务就全乱套了。此外，很多安全认证，也是基于`ThreadLocal`实现的，可以保证在处理请求的过程中，各个线程互不影响。
 
-但是，如果一个请求处理的时间较长，例如几秒钟甚至更长，那么，这种基于线程池的同步模型很快就会把所有线程耗尽，导致服务器无法响应新的请求。如果把长时间处理的请求改为异步处理，那么线程池的利用率就会大大提高。
+SpringMVC中，线程主要分为两大类，分别是 `请求线程`与 `线程池线程`：
+
++ 请求线程：主要是 Servlet 容器分配的线程，处理Http请求的生命周期，默认同步处理完请求的所有逻辑并返回相应，遇到IO即阻塞
++ 线程池线程：来自框架提供的线程池中的线程，负责在异步处理时启动异步任务，实际执行长时间操作的业务逻辑，当请求线程被释放后，任务会交给线程池中线程执行，任务完成返回结果，可以有效避免请求线程被阻塞，提高系统的并发能力。
 
 ![img](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-6298f67d605218bd1b2b2db5193c46bc.png)
 
@@ -1446,7 +2909,50 @@ public Callable<List<User>> users() {
 }
 ```
 
+第二种为返回一个`DeferedResult`对象，然后在另一个线程中设置此对象的值并写入相应：（这种使用更多，编程更加友好）
 
+```java
+@GetMapping("/users/{id}")
+public DeferredResult<User> user(@PathVariable("id") long id) {
+    DeferredResult<User> result = new DeferredResult<>(3000L); // 3秒超时
+    new Thread(() -> {
+        // 等待1秒:
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+        try {
+            User user = userService.getUserById(id);
+            // 设置正常结果并由Spring MVC写入Response:
+            result.setResult(user);
+        } catch (Exception e) {
+            // 设置错误结果并由Spring MVC写入Response:
+            result.setErrorResult(Map.of("error", e.getClass().getSimpleName(), "message", e.getMessage()));
+        }
+    }).start();
+    return result;
+}
+```
+
+
+
+在SpringMVC使用异步还有几个需要注意的点：
+
+1、异常处理，由于执行逻辑不再在主线程中，因此定义的全局异常捕获不一定能捕获到异常，具体来说，在返回 `DeferredResult`对象时，我们像上述代码中一样，手动捕获异常并使用 `setErrorResult`方法将异常传递出去，这样才能被全局异常捕获方法捕获
+
+2、其次，`filter`的使用需要注意，原有`filter`需要进一步设置一下才能正常使用：
+
+```java
+ <filter>
+        <filter-name>async-filter</filter-name>
+        <filter-class>com.itranswarp.learnjava.web.AsyncFilter</filter-class>
+        <async-supported>true</async-supported>
+</filter>
+```
+
+未声明 `async-support`的`filter`遇到async请求会直接报错，因此，务必注意普通Filter的`<url-pattern>`不要匹配async请求路径。
+
+3、要时刻牢记，在另一个异步线程中的事务和Controller方法中执行的事务不是同一个事务，在Controller中绑定的`ThreadLocal`信息也无法在异步线程中获取。
 
 ### RESTful
 
@@ -1474,7 +2980,9 @@ Filter属于标准Servlet组件之一，因此是由Servlet管理，Filter组件
 
 那我们再来谈谈 `Interceptor`（**拦截器**）：
 
-既然使用Filter这么麻烦，那我们为什么不脱离 Servlet 在SpringMVC中实现一个功能类似Filter的东西呢：`Interceptor`；因此这两者处理流程如下：![image-20241003173532052](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/image-20241003173532052.png)
+既然使用Filter这么麻烦，那我们为什么不脱离 Servlet 在SpringMVC中实现一个功能类似Filter的东西呢：`Interceptor`；因此这两者处理流程如下：
+
+![image-20241003173532052](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/image-20241003173532052.png)
 
 所以，Interceptor的拦截范围其实就是Controller方法，它实际上就相当于基于AOP的方法拦截。因为Interceptor只拦截Controller方法，所以要注意，返回`ModelAndView`并渲染后，后续处理就脱离了Interceptor的拦截范围。
 
@@ -1565,15 +3073,366 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
 
 
+### 集成JavaMail
 
+对于服务器来说，主要任务是发送右键，很少有接收邮件的情况，主要依赖：
 
-## SpringBoot开发
+```xml
+jakarta.mail:jakarta.mail-api:2.0.1
+com.sun.mail:jakarta.mail:2.0.1
+```
 
-我们先来看一下 web 框架演变流程：
+场景假设：用户在注册完账号后能够收到注册成功邮件：
 
-![浅谈JavaWeb架构演变- Alan_beijing - 博客园](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/1066923-20190215134419800-1367307662.png)
+为此，首先定义 `JavaMailSender`组件：
 
+```java
+@Bean
+JavaMailSender createJavaMailSender(
+        // 从配置文件中读取SMTP服务器的主机地址
+        @Value("${smtp.host}") String host,
+        // 从配置文件中读取SMTP服务器的端口号
+        @Value("${smtp.port}") int port,
+        // 从配置文件中读取SMTP是否需要身份验证
+        @Value("${smtp.auth}") String auth,
+        // 从配置文件中读取SMTP账户的用户名
+        @Value("${smtp.username}") String username,
+        // 从配置文件中读取SMTP账户的密码
+        @Value("${smtp.password}") String password,
+        // 从配置文件中读取是否启用调试模式，默认值为true
+        @Value("${smtp.debug:true}") String debug)
+{
+    // 创建一个JavaMailSenderImpl实例
+    var mailSender = new JavaMailSenderImpl();
 
+    // 设置SMTP服务器主机地址
+    mailSender.setHost(host);
+    // 设置SMTP服务器端口号
+    mailSender.setPort(port);
+    // 设置SMTP账户的用户名
+    mailSender.setUsername(username);
+    // 设置SMTP账户的密码
+    mailSender.setPassword(password);
+
+    // 获取JavaMail属性对象
+    Properties props = mailSender.getJavaMailProperties();
+
+    // 设置邮件传输协议为SMTP
+    props.put("mail.transport.protocol", "smtp");
+    // 设置SMTP是否需要身份验证
+    props.put("mail.smtp.auth", auth);
+
+    // 如果使用端口587，启用TLS加密
+    if (port == 587) {
+        props.put("mail.smtp.starttls.enable", "true");
+    }
+
+    // 如果使用端口465，启用SSL加密
+    if (port == 465) {
+        props.put("mail.smtp.socketFactory.port", "465");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+    }
+
+    // 设置是否启用调试模式（用于打印调试信息）
+    props.put("mail.debug", debug);
+
+    // 返回配置好的JavaMailSender对象
+    return mailSender;
+}
+
+```
+
+下一步封装 `MailService`，并定义`sendRegistationMail`方法：
+
+```java
+// 使用@Component注解，表明MailService是一个Spring组件，可以被自动扫描并注入
+@Component
+public class MailService {
+
+    // 从配置文件中读取发件人地址(smtp.from)
+    @Value("${smtp.from}")
+    String from;
+
+    // 自动注入JavaMailSender，用于发送邮件
+    @Autowired
+    JavaMailSender mailSender;
+
+    /**
+     * 发送注册邮件
+     * @param user 接收邮件的用户对象，包含了用户的邮箱和姓名等信息
+     */
+    public void sendRegistrationMail(User user) {
+        try {
+            // 创建一个MIME格式的邮件消息对象
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+            // 使用MimeMessageHelper帮助类来设置邮件内容，第二个参数表示启用HTML格式
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+            // 设置发件人
+            helper.setFrom(from);
+
+            // 设置收件人，使用从User对象中获取的邮箱地址
+            helper.setTo(user.getEmail());
+
+            // 设置邮件主题
+            helper.setSubject("Welcome to Java course!");
+
+            // 设置邮件正文，使用HTML格式，可以通过String.format动态插入用户姓名和当前时间
+            String html = String.format(
+                "<p>Hi, %s,</p><p>Welcome to Java course!</p><p>Sent at %s</p>", 
+                user.getName(), 
+                LocalDateTime.now()
+            );
+            helper.setText(html, true);  // true表示启用HTML格式
+
+            // 发送邮件
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            // 如果邮件发送过程中出现异常，抛出运行时异常
+            throw new RuntimeException(e);
+        }
+    }
+}
+
+```
+
+### 集成 JMS
+
+JMS即Java Message Service，是JavaEE的消息服务接口，所谓消息服务，就是两个进程之间，通过消息服务器传递消息：
+
+```
+┌────────┐    ┌──────────────┐    ┌────────┐
+│Producer│──▶│Message Server│───▶│Consumer│
+└────────┘    └──────────────┘    └────────┘
+```
+
+使用消息服务，而不是直接调用对方的API，它的好处是：
+
+- 双方各自无需知晓对方的存在，消息可以异步处理，因为消息服务器会在Consumer离线的时候自动缓存消息；
+- 如果Producer发送的消息频率高于Consumer的处理能力，消息可以积压在消息服务器，不至于压垮Consumer；
+- 通过一个消息服务器，可以连接多个Producer和多个Consumer。
+
+因为消息服务在各类应用程序中非常有用，所以JavaEE专门定义了JMS规范。注意到JMS是一组接口定义，如果我们要使用JMS，还需要选择一个具体的JMS产品。常用的JMS服务器有开源的[ActiveMQ](https://activemq.apache.org/)，ActiveMQ有两个分支，推荐使用 `ActiveMQ Artemis`。
+
+和ActiveMQ Classic相比，Artemis版的代码与Classic完全不同，并且，它支持JMS 2.0，使用基于Netty的异步IO，大大提升了性能。此外，Artemis不仅提供了JMS接口，它还提供了AMQP接口，STOMP接口和物联网使用的MQTT接口。选择Artemis，相当于一鱼四吃。
+
+在编写JMS代码之前，我们首先得理解JMS的消息模型。JMS把生产消息的一方称为Producer，处理消息的一方称为Consumer。有两种类型的消息通道，一种是Queue：
+
+```
+┌────────┐    ┌────────┐    ┌────────┐
+│Producer│───▶│ Queue  │───▶│Consumer│
+└────────┘    └────────┘    └────────┘
+```
+
+一种是Topic：
+
+```
+                            ┌────────┐
+                         ┌─▶│Consumer│
+                         │  └────────┘
+┌────────┐    ┌────────┐ │  ┌────────┐
+│Producer│───▶│ Topic  │─┼─▶│Consumer│
+└────────┘    └────────┘ │  └────────┘
+                         │  ┌────────┐
+                         └─▶│Consumer│
+                            └────────┘
+```
+
+它们的区别在于，Queue是一种一对一的通道，如果Consumer离线无法处理消息时，Queue会把消息存起来，等Consumer再次连接的时候发给它。设定了持久化机制的Queue不会丢失消息。如果有多个Consumer接入同一个Queue，那么它们等效于以集群方式处理消息，例如，发送方发送的消息是A，B，C，D，E，F，两个Consumer可能分别收到A，C，E和B，D，F，即每个消息只会交给其中一个Consumer处理。
+
+Topic则是一种一对多通道。一个Producer发出的消息，会被多个Consumer同时收到，即每个Consumer都会收到一份完整的消息流。那么问题来了：如果某个Consumer暂时离线，过一段时间后又上线了，那么在它离线期间产生的消息还能不能收到呢？
+
+这取决于消息服务器对Topic类型消息的持久化机制。如果消息服务器不存储Topic消息，那么离线的Consumer会丢失部分离线时期的消息，如果消息服务器存储了Topic消息，那么离线的Consumer可以收到自上次离线时刻开始后产生的所有消息。JMS规范通过Consumer指定一个持久化订阅可以在上线后收取所有离线期间的消息，如果指定的是非持久化订阅，那么离线期间的消息会全部丢失。
+
+细心的童鞋可以看出来，如果一个Topic的消息全部都持久化了，并且只有一个Consumer，那么它和Queue其实是一样的。实际上，很多消息服务器内部都只有Topic类型的消息架构，Queue可以通过Topic“模拟”出来。
+
+无论是Queue还是Topic，对Producer没有什么要求。多个Producer也可以写入同一个Queue或者Topic，此时消息服务器内部会自动排序确保消息总是有序的。
+
+以上是消息服务的基本模型。具体到某个消息服务器时，Producer和Consumer通常是通过TCP连接消息服务器，在编写JMS程序时，又会遇到`ConnectionFactory`、`Connection`、`Session`等概念，其实这和JDBC连接是类似的：
+
+- ConnectionFactory：代表一个到消息服务器的连接池，类似JDBC的DataSource；
+- Connection：代表一个到消息服务器的连接，类似JDBC的Connection；
+- Session：代表一个经过认证后的连接会话；
+- Message：代表一个消息对象。
+
+JMS 2.0改进了一些API接口，发送消息变得更简单：
+
+```java
+try (JMSContext context = connectionFactory.createContext()) {
+    context.createProducer().send(queue, text);
+}
+```
+
+`JMSContext`实现了`AutoCloseable`接口，可以使用`try(resource)`语法，代码更简单。
+
+行，有了以上预备知识，我们现在就开始开发 `JMS`应用了：
+
+```xml
+org.springframework:spring-jms:6.0.0
+org.apache.activemq:artemis-jakarta-client:2.27.0
+```
+
+1、使用 `@EnableJms`注解让Spring自动扫描JMS相关的Bean
+
+2、加载JMS配置文件，并创建`ConnectionFactory`组件，即连接消息服务器的连接池：
+
+```java
+@Bean
+ConnectionFactory createJMSConnectionFactory(){
+    String uri = jMSProperties.getUri();
+    String username = jMSProerties.getUsername();
+    String password = jMSProperties.getPassword();
+    return new ActivateMQJMSConnectionFactory(uri,username,password);
+}
+```
+
+3、创建`JmsTemplate`，他是Spring提供的一个工具类，类似于 `JdbcTemplate`，可以简化发送消息的代码;
+
+```java
+@Bean
+JmsTemplate createJmsTemplate(@Autowired ConnectionFactory connectionFactory) {
+    return new JmsTemplate(connectionFactory);
+}
+```
+
+4、创建 `JmsListenerContainerFactory`:
+
+```java
+@Bean("jmsListenerContainerFactory")
+DefaultJmsListenerContainerFactory createJmsListenerContainerFactory(@Autowired ConnectionFactory connectionFactory) {
+    var factory = new DefaultJmsListenerContainerFactory();
+    factory.setConnectionFactory(connectionFactory);
+    return factory;
+}
+```
+
+5、编写 `MessagingService`来发送消息：
+
+```java
+@Component
+public class MessagingService{
+    @Autowired ObjectMapper objectMapper;
+    @Autowired JmsTemplate jmsTemplate;
+    
+    public void sendMailMessage(MailMessage msg) thorws Exception{
+        // 将我们自定义的类序列化JSON字符串
+        String text = objectMapper.writeValueAsString(msg);
+        // 创建TextMessage封装JSON字符串
+        jmsTemplate.send("jms/queue/mail",new MessageCreator(){
+           public Message creteMessage(Session session) throws JMSException{
+               return session.createTextMessage(text);
+           } 
+        });
+    }
+}
+```
+
+JMS的消息类型支持以下几种：
+
+- TextMessage：文本消息；
+- BytesMessage：二进制消息；
+- MapMessage：包含多个Key-Value对的消息；
+- ObjectMessage：直接序列化Java对象的消息；
+- StreamMessage：一个包含基本类型序列的消息。
+
+最常用的是发送基于JSON的文本消息，上述代码通过`JmsTemplate`创建一个`TextMessage`并发送到名称为`jms/queue/mail`的Queue。
+
+再注意到`MailMessage`是我们自己定义的一个JavaBean，真正的JMS消息是创建的`TextMessage`，它的内容是JSON。
+
+当用户注册成功后，我们就调用`MessagingService.sendMailMessage()`发送一条JMS消息，此代码十分简单，这里不再贴出。
+
+6、编写消息处理代码
+
+```java
+@Component
+public class MailMessageListener {
+    final Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Autowired ObjectMapper objectMapper;
+    @Autowired MailService mailService;
+
+    @JmsListener(destination = "jms/queue/mail", concurrency = "10")
+    public void onMailMessageReceived(Message message) throws Exception {
+        logger.info("received message: " + message);
+        if (message instanceof TextMessage) {
+            // 从TextMessage中提取出JSON字符串
+            String text = ((TextMessage) message).getText();
+            // 将JSON字符串反序列化为对象
+            MailMessage mm = objectMapper.readValue(text, MailMessage.class);
+            mailService.sendRegistrationMail(mm);
+        } else {
+            logger.error("unable to process non-text message!");
+        }
+    }
+}
+```
+
+注意到`@JmsListener`指定了Queue的名称，因此，凡是发到此Queue的消息都会被这个`onMailMessageReceived()`方法处理，方法参数是JMS的`Message`接口，我们通过强制转型为`TextMessage`并提取JSON，反序列化后获得自定义的JavaBean，也就获得了发送邮件所需的所有信息。
+
+监听器执行流程如下：Spring根据`AppConfig`的注解`@EnableJms`自动扫描带有`@JmsListener`的Bean方法，并为其创建一个`MessageListener`把它包装起来。
+
+注意到前面我们还创建了一个`JmsListenerContainerFactory`的Bean，它的作用就是为每个`MessageListener`创建`MessageConsumer`并启动消息接收循环。
+
+再注意到`@JmsListener`还有一个`concurrency`参数，10表示可以最多同时并发处理10个消息，`5-10`表示并发处理的线程可以在5~10之间调整。
+
+因此，Spring在通过`MessageListener`接收到消息后，并不是直接调用`mailMessageListener.onMailMessageReceived()`，而是用线程池调用，因此，要时刻牢记，`onMailMessageReceived()`方法可能被多线程并发执行，一定要保证线程安全。
+
+7、总结：
+
+使用消息服务对发送Email进行改造的好处是，发送Email的能力通常是有限的，通过JMS消息服务，如果短时间内需要给大量用户发送Email，可以先把消息堆积在JMS服务器上慢慢发送，对于批量发送邮件、短信等尤其有用。
+
+### 使用Scheduler
+
+在SpringMVC中使用定时任务非常简单，不需要手动编写线程池相关代码，只需要两个注解即可。
+
+1、加上 `@EnableScheduling`注解开启对于定时任务的支撑
+
+2、接下来编写我们的定时任务方法，并加上`@Scheduled`注解：
+
+3、加上`Cron`表达式，基本格式为 `秒 分 小时 天 月份 星期 年`
+
+```java
+@Component
+public class TaskService{
+    final Logger logger = LoggerFactory.getLogger(getClass());
+    
+    @Scheduled(cron="0 * * * * * *")
+    public checkSystemStatusEveryMinute(){
+        logger.info("Check System status.....");
+    }
+}
+```
+
+### 集成JMX
+
+JMX是Java Management Extensions，它是一个Java平台的管理和监控接口。为什么要搞JMX呢？因为在所有的应用程序中，对运行中的程序进行监控都是非常重要的，Java应用程序也不例外。我们肯定希望知道Java应用程序当前的状态，例如，占用了多少内存，分配了多少内存，当前有多少活动线程，有多少休眠线程等等。如何获取这些信息呢？
+
+等用到再学习吧。
+
+# SpringBoot开发
+
+### 什么是SpringBoot
+
+在以上，我们已经学习过Spring框架，主要包含IoC容器、AOP支持、事务管理、MVC开发以及强大的第三方功能集成等等。
+
+而SpringBoot是基于Spring框架的**套件**，所谓套件，就是帮我们预装了Spring框架中的一些列组件，以便我们在开发时可以使用更少的代码以及更少的配置来开发基于Spring框架的Java应用程序。
+
+> 以汽车为例，如果我们想组装一辆汽车，我们需要发动机、传动、轮胎、底盘、外壳、座椅、内饰等各种部件，然后把它们装配起来。Spring就相当于提供了一系列这样的部件，但是要装好汽车上路，还需要我们自己动手。而Spring Boot则相当于已经帮我们预装好了一辆可以上路的汽车，如果有特殊的要求，例如把发动机从普通款换成涡轮增压款，可以通过修改配置或编写少量代码完成。
+
+因此，SpringBoot与Spring的关机就是整车与零件的关系，他就是为我们提供了一个开箱即用的程序架构！！！！，更加省时省力开发。。。
+
+SpringBoot主流有2.x与3.x版本，使用时需要特别注意：
+
+| Spring Boot 2.x | Spring Boot 3.x  |                    |
+| --------------- | ---------------- | ------------------ |
+| Spring版本      | Spring 5.x       | Spring 6.x         |
+| JDK版本         | >= 1.8           | >= 17              |
+| Tomcat版本      | 9.x              | 10.x               |
+| Annotation包    | javax.annotation | jakarta.annotation |
+| Servlet包       | javax.servlet    | jakarta.servlet    |
+| JMS包           | javax.jms        | jakarta.jms        |
+| JavaMail包      | javax.mail       | jakarta.mail       |
 
 ### 前后端分离开发
 
@@ -1671,3 +3530,1065 @@ SPA式的前后端分离，从物理层做区分（认为只要是客户端的�
 (2)响应速度提升；我们有时候，会遇到后端返回给前端的数据太简单了，前端需要对这些数据进行逻辑运算。那么在数据量比较小的时候，对其做运算分组等操作，并无影响。但是当数据量大的时候，会有明显的卡顿效果。这时候，node中间层其实可以将很多这样的代码放入node层处理、也可以替后端分担一些简单的逻辑、又可以用模板引擎自己掌握前台的输出。这样做灵活度、响应度都大大提升。
 
  (3)性能得到提升；大家应该都知道单一职责原则。从该角度来看，我们，请求一个页面，可能要响应很多个后端接口，请求变多了，自然速度就变慢了，这种现象在mobile端更加严重。采用node作为中间层，将页面所需要的多个后端数据，直接在内网阶段就拼装好，再统一返回给前端，会得到更好的性能
+
+
+
+### 初试SpringBoot 项目
+
+#### 配置
+
+标准使用 `yml`格式配置文件，在配置文件中，我们也常常这样进行配置：
+
+```yaml
+app:
+  db:
+    host: ${DB_HOST:localhost}
+    user: ${DB_USER:root}
+    password: ${DB_PASSWORD:password}
+```
+
+这样程序会首先从环境变量中读取 `DB_HOST`、`DB_USER`等变量，如果读取失败则使用设置的默认值 `localhost`、`root`，在实际使用时，我们如此配置即可：
+
+```shell
+$ DB_HOST=10.0.1.123 
+DB_USER=prod 
+DB_PASSWORD=xxxx 
+java -jar xxx.jar
+```
+
+#### 日志
+
+默认有一个 `logback-spring.xml`文件，这是因为Spring Boot默认使用 `LogBack`作为日志实现（Spring-boot-starter或者Spring-boot-starter-web都引用了spring-boot-starter-logging），无需添加额外依赖，并且使用 `SLF4j`作为日志门面。 Java日志其实非常复杂，这里使用一张图来说明：
+
+![img](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-47a6d286ec137a499f1f8b8ef2655883.png)
+
+意思是，我们在Java层调用 `SLF4j`的接口，底层通过 `logback-spring.xml`来决定具体日志打印规则。
+
+xml文件为：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+	// 定义appender，即日志的输出目的地，其中可以具体的日志格式
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+	// 定义appender，即日志的输出目的地，其中可以具体的日志格式
+    <appender name="APP_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+          <file>app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <maxIndex>1</maxIndex>
+            <fileNamePattern>app.log.%i</fileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>1MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+	// 注册appender，并设置日志级别
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="APP_LOG" />
+    </root>
+</configuration>
+```
+
+
+
+#### 目录结构
+
+SPringBOot不需要专门的webapp目录，所有的丽日`templates`文件、js文件等统一存放在 `resources`目录下。
+
+并且要求 `main`方法所在的启动类必须放到根`package`下，通常为 `XXX.Application.java`，内容为：·
+
+```java
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) throws Exception {
+        SpringApplication.run(Application.class, args);
+    }
+}
+```
+
+看似只有一个 `@SpringBootApplication`注解，实际上包含了：
+
++ @SpringBootConfiguration
+    + @Configuration
++ @EnableAutoConfiguration
+    + @AutoConfiguration
++ @ComponentScan
+
+这就相当于开启了**自动配置**&& **自动扫描**：
+
+再看看pom文件：
+
+```xml
+<parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.0.0</version>
+</parent>
+```
+
+这个是必不可少的，继承自 `Spring-boot-starter-parent`，主要目的是为了简化项目的配置管理和依赖管理。它预定义了许多常用依赖（如Spring Framework、Jackson、Tomcat等）的版本号，开发者不需要手动管理每个依赖的版本。通过继承`spring-boot-starter-parent`，项目可以自动使用这些经过Spring团队测试和兼容的依赖版本，减少版本冲突的可能性。其次`spring-boot-starter-parent`还包含了一些Maven插件的默认配置，比如`maven-compiler-plugin`、`maven-surefire-plugin`等。这些插件的默认配置被精心调优，可以减少开发者在配置Maven项目时的工作量。
+
+```java
+<dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+   		 <!-- 集成Pebble View -->
+        <dependency>
+            <groupId>io.pebbletemplates</groupId>
+            <artifactId>pebble-spring-boot-starter</artifactId>
+            <version>${pebble.version}</version>
+        </dependency>
+
+        <!-- JDBC驱动 -->
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+        </dependency>
+</dependency>
+```
+
+其次，我们导入依赖`spring-boot-starter-web`和`spring-boot-starter-jdbc`，它们分别引入了Spring MVC相关依赖和Spring JDBC相关依赖，无需指定版本号，因为引入的`<parent>`内已经指定了，只有我们自己引入的某些第三方jar包需要指定版本号。
+
+再其次，我们根据 `pebble-spring-boot-starter`的文档，了解如何通过 `application.yml`进行配置：
+
+```yml
+peddle:
+  #默认为".peb",改为 ""
+  suffix:
+  # 开发阶段禁用模板缓存
+  cache: false
+```
+
+
+
+最后当我们启动SpringBoot时，会看到SpringBoot会自动启动**嵌入**d额`tomcat`
+
+### 自动注入
+
+详细说明之前有将
+
+这里仅仅举一个例子，当我们引入了 `spring-boot-starter-jdbc`时，启动会自动扫描所有相关的 `XXXConfiguration`：
+
++ `DataSourceAutoConfiguration`：自动创建一个`DataSource`组件，需要的配置从`application.xml`中读取
++ `DataSourceTransactionManagerAutoCOnfiguration`：自动传阿金了一个基于JDBC的事务管理器
++ `JDBCTemplateAutoConfiguration`：自动创建了JdbcTemplate组件
+
+这样，我们就自动得到了三个组件，类似的，当我们导入 `spring-boot-starter-web`时，自动创建了：
+
+- `ServletWebServerFactoryAutoConfiguration`：自动创建一个嵌入式Web服务器，默认是Tomcat；
+- `DispatcherServletAutoConfiguration`：自动创建一个`DispatcherServlet`；
+- `HttpEncodingAutoConfiguration`：自动创建一个`CharacterEncodingFilter`；
+- `WebMvcAutoConfiguration`：自动创建若干与MVC相关的Bean。
+- ...
+
+引入第三方`pebble-spring-boot-starter`时，自动创建了：
+
+- `PebbleAutoConfiguration`：自动创建了一个`PebbleViewResolver`
+
+Spring Boot大量使用`XxxAutoConfiguration`来使得许多组件被自动化配置并创建，而这些创建过程又大量使用了Spring的Conditional功能。例如，我们观察`JdbcTemplateAutoConfiguration`，它的代码如下：
+
+```java
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnClass({ DataSource.class, JdbcTemplate.class })
+@ConditionalOnSingleCandidate(DataSource.class) // 仅有唯一的DataSource类
+@AutoConfigureAfter(DataSourceAutoConfiguration.class)
+@EnableConfigurationProperties(JdbcProperties.class) 
+@Import({ JdbcTemplateConfiguration.class, NamedParameterJdbcTemplateConfiguration.class })
+@ConditionalOnMissingBean(JdbcOperations.class) // JDBC不存在JdbcOpreations对象（JdbcOprations类是JDBCTemplate的父类）
+public class JdbcTemplateAutoConfiguration {
+}
+```
+
+当满足条件：
+
+- `@ConditionalOnClass`：在classpath中能找到`DataSource`和`JdbcTemplate`；
+- `@ConditionalOnSingleCandidate(DataSource.class)`：在当前Bean的定义中能找到唯一的`DataSource`；
+
+### 开发者工具
+
+Spring Boot提供了一个开发者工具，可以监控classpath路径上的文件。只要源码或配置文件发生修改，Spring Boot应用可以自动重启。在开发阶段，这个功能比较有用。
+
+这样就不用我们每次重启项目了！！！
+
+导入依赖：
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+</dependency>
+```
+
+### 打包
+
+在传统的Maven项目中，我们也可以使用插件进行项目打包，在sp中，打包更加简单，因为sp自带一个plugin插件，可以自动定位程序入口Class，我们使用如下命令即可打包：
+
+`mvn clean package`,执行完后就可以在`target`目录下看见`xiaohao-app.jar`包，其中也包含了项目的各种依赖。
+
+```xml
+<buiild>
+    <finalName>xiaohao-app</finalName>
+	<plugins>
+    	<plugin>
+        	<groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</buiild>
+```
+
+### 使用JMS
+
+### 使用RabbitMQ
+
+![image-20241008102308651](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-396ec70d204dd490c67a146a79ae38e9.png)
+
+其基本架构如上图，其没有`topic`的概念，转而引入了Exchange的概念
+
+当一个Producer想要发送消息的时候，它会将消息发送给`Exchange`，由`Exchange`设定的规则将消息发送给各个`Queue`，可以看到，Exchange与queue是一对多的关系，这种关系我们可以在RabbitMQ中设置，比如如下的绑定，表示当消息发送给`login`这个`Exchange`的时候，如果不指定Routing key，则发送给q_app以及q_mail这两个队列， 如果指定了 login_failed的routing_key，则发送给q_sms这个队列。另外，RabbitMQ有一个默认的Exchange，可以使用它给具体的某一个Queue发送消息；
+
+![exchange-login](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-6d30b9d1ea277f16d6f987d94adca038.png)
+
+SpringBoot集成RabbitMQ非常简单：
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-amqp</artifactId>
+</dependency>
+```
+
+配置：
+
+```yml
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+```
+
+我们还需要设定一个`MessageConverter`组件，用于将Java对象转化为 RabbitMQ的消息，默认情况下使用SimpleMessageConvert，只能发送String以及Byte类型消息。这个Convert是Spring AMQP的MessageConvert，专门用于在消息队列中传递对象时，JSON格式的转换（区别于SpringMVC中提及的MappingJackson2HttpMessageConvert，两个转换器使用场景以及配置上方式都是完全不一样的）； **Spring会自动将MessageConvert绑定到RabbitTemplate中，无需手动绑定**
+
+```java
+@Bean
+MessageConvert createMessageConvert(){
+    return new Jackson2JsonMessageConvert();
+}
+```
+
+有了`RabbitTemplate`操作就非常简单了：
+
+对于生产者：
+
+```java
+@Component
+public class MessagingService{
+    @Autowired RabbitTemplate rabbitTemplate;
+    
+    public void sendRegistrationMessage(RegistrationMessage msg){
+        rabbitTemplate.convertAndSend("registration","",msg); // 参数分别是 1、Exchange 2、Routing key 3、要发送的消息
+        
+    }
+    public void sendLoginMessage(LoginMessage msg){
+        String routingKey = msg.success ? "":"login_failed";
+        rabbitTemplate.convertAndSend("login",routingKey,msg);
+    }
+}
+```
+
+对于消费者：只需要关心队列名称，而不需要关注Exchange，只需要用到 `@RabbitListener`注解：
+
+```java
+@Component
+public class QueueMessageListener{
+   final Logger logger = LoggerFactory.getLogger(getClass());
+
+    static final String QUEUE_MAIL = "q_mail";
+    static final String QUEUE_SMS = "q_sms";
+    static final String QUEUE_APP = "q_app";
+
+    @RabbitListener(queues = QUEUE_MAIL)
+    public void onRegistrationMessageFromMailQueue(RegistrationMessage message) throws Exception {
+        logger.info("queue {} received registration message: {}", QUEUE_MAIL, message);
+    }
+
+    @RabbitListener(queues = QUEUE_SMS)
+    public void onRegistrationMessageFromSmsQueue(RegistrationMessage message) throws Exception {
+        logger.info("queue {} received registration message: {}", QUEUE_SMS, message);
+    }
+
+    @RabbitListener(queues = QUEUE_MAIL)
+    public void onLoginMessageFromMailQueue(LoginMessage message) throws Exception {
+        logger.info("queue {} received message: {}", QUEUE_MAIL, message);
+    }
+
+    @RabbitListener(queues = QUEUE_SMS)
+    public void onLoginMessageFromSmsQueue(LoginMessage message) throws Exception {
+        logger.info("queue {} received message: {}", QUEUE_SMS, message);
+    }
+
+    @RabbitListener(queues = QUEUE_APP)
+    public void onLoginMessageFromAppQueue(LoginMessage message) throws Exception {
+        logger.info("queue {} received message: {}", QUEUE_APP, message);
+    }
+}
+```
+
+上述针对3个queue定义了5个Consumer，当多个Consumer对应同一个Queue时，默认采用轮询的方式，
+
+### 使用kafka
+
+`kafka`也是一个消息服务器，特点就是快、支持大吞吐量。我们知道 JMS是JavaEE的标准消息接口，Artmis是一个JMS实现产品，AMQP是跨语言的一个标准消息接口，RabbitMQ是一个AMQP实现产品。 Kafka就比较特殊了，他没有实现任何标准的消息接口，他自己就是标准。
+
+![image-20241008112832740](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-20147448ce657711f4075a6173a101d0.png)
+
+其设计框架如上图，但是其Topic则非常复杂，使得其能支持高吞吐量：
+
+消费者组：组内的每个消费者负责不同的partition
+
+Broker：一台Kafka服务器就是一个broker，Kafka集群就是有很多个broker组成，一个Broker可以容纳多个topic；
+
+partition：一个topic可以分为多个partition，每个partition都是一个 **有序**队列；
+
+Replica：partition分区副本，防止意外故障；
+
+offset：消费者组中的每个消费者都会记录自己消费到了哪个offset，以便出错时恢复
+
+<img src="https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-032af0b68b4c40f6bf70719e6bab275b.png" alt="kafka架构" style="zoom: 67%;" />
+
+topic是逻辑上的概念，而partition是物理上的概念，partition为了放置log文件过大（分片索引机制），已拆分成多个segment，每个都含有一个log文件和index文件：
+
+<img src="https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-35bba13c3b62b9f74b684de9ce36f2eb.png" alt="img" style="zoom:67%;" />
+
+
+
+依赖：
+
+```xml
+<dependency>
+    <groupId>org.springframework.kafka</groupId>
+    <artifactId>spring-kafka</artifactId>
+</dependency>
+```
+
+添加配置：
+
+```yml
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: latest
+      max-poll-records: 100
+      max-partition-fetch-bytes: 1000000
+```
+
+除了`bootstrap-servers`必须指定外，`consumer`相关的配置项均为调优选项。例如，`max-poll-records`表示一次最多抓取100条消息。配置名称去哪里看？IDE里定义一个`KafkaProperties.Consumer`的变量：
+
+```java
+KafkaProperties.Consumer c = null;
+```
+
+然后按住Ctrl查看源码即可。
+
+#### 发送消息
+
+生产者配置：
+
+```yml
+spring.kafka.bootstrap-servers=192.168.22.161:9092,192.168.22.162:9092,192.168.22.163:9092
+#######################################【初始化生产者配置】#######################################
+# 重试次数
+spring.kafka.producer.retries=1
+# 应答级别:多少个分区副本备份完成时向生产者发送ack确认(可选0、1、all/-1)
+spring.kafka.producer.acks=-1
+# broker用来识别消息是来自哪个客户端的。在broker进行打印日志、衡量指标或者配额限制时会用到
+spring.kafka.admin.client-id=kun-117
+# 批量发送大小
+spring.kafka.producer.batch-size=16384
+# 提交延时
+# 当生产端积累的消息达到batch-size或接收到消息linger.ms后,生产者就会将消息提交给kafka
+# linger.ms为0表示每接收到一条消息就提交给kafka,这时候batch-size其实就没用了
+spring.kafka.producer.properties.linger.ms=0
+# 生产端缓冲区大小
+spring.kafka.producer.buffer-memory=33554432
+# Kafka提供的序列化和反序列化类
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+# 自定义分区器
+# spring.kafka.producer.properties.partitioner.class=com.kun.kafka.producer.CustomizePartitioner
+# 消息的压缩发送，可选择snappy、gzip或者lz4，默认不压缩
+# spring.kafka.producer.compression-type=snappy
+# 事务前缀，配置即开启事务
+# spring.kafka.producer.transaction-id-prefix=${spring.kafka.admin.client-id}
+```
+
+
+
+SpringbOot自动配置为我们自动创建了一个 `KafkaTemplate`组件用于发送消息，这是一个泛型类，默认总是以String作为Kafka的消息类型，所以注入 KafkaTemplate<String,String>即可：
+
+```java
+// 发送消息
+kafkaTemplate.send("test-topic", new UserBean("kun", 18));
+// 发送消息，取key的hashcode发送到指定的partition
+kafkaTemplate.send("test-topic", "key-1", new UserBean("Jack", 20));
+// 发送消息，根据传入的partition发送到指定的partition
+kafkaTemplate.send("test-topic", 0, "", new UserBean("Jane", 21));
+// 发送消息，根据传入的partition发送到指定的partition，并添加当前时间戳作为消息头
+kafkaTemplate.send("test-topic", 0, DateUtil.currentSeconds(), "", new UserBean("Lot", 33));
+```
+
+
+
+#### 接收消息
+
+consumer采用pull（拉）模式从broker中读取数据。
+
+push（推）模式很难适应消费速率不同的消费者，因为消息发送速率是由broker决定的。它的目标是尽可能以最快速度传递消息，但是这样很容易造成consumer来不及处理消息，典型的表现就是拒绝服务以及网络拥塞。而pull模式则可以根据consumer的消费能力以适当的速率消费消息。
+
+pull模式不足之处是，如果kafka没有数据，消费者可能会陷入循环中，一直返回空数据。针对这一点，Kafka的消费者在消费数据时会传入一个时长参数timeout，如果当前没有数据可供消费，consumer会等待一段时间之后再返回，这段时长即为timeout。
+
+#### Zookeeper
+
+Kafka集群中有一个broker会被选举为Controller，负责管理集群broker的上下线，所有topic的分区副本分配和leader选举等工作。 Controller的管理工作都是依赖于Zookeeper的。
+
+![img](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-9ce2b797fcb043df0c6be0c2105ee5c7.png)
+
+
+
+# SpringSecurity
+
+## SecurityFilterChain
+
+### 原理
+
+当一个http请求到来，根据学过的JavaWeb开发， 我们知道其先走Filter，再走Servlet  ；在Servlet组件中专门设置了一个Filter用于认证，当然为了功能实现过于耦合，在这个FIlter中有定义了一个FilterChain，包含由很多细分的小的FIlter进行认证功能划分。
+
++ `DelegationFilterProxy`：在传统的 Servlet 容器中，Filter 的生命周期由 Servlet 容器管理，这就意味着 Filter 不能直接使用 Spring 容器提供的依赖注入等功能。`DelegatingFilterProxy` 过滤器作为一个代理，它在 Servlet 容器中被初始化，但它实际上会委托给一个在 Spring IoC 容器中定义的 Filter 对象来执行实际的工作
++ `FilterChainProxy`是Spring Security中非常核心的一个组件，它负责将HTTP请求委托给配置的一系列过滤器链进行处理
++ [`SecurityFilterChain`](https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/web/SecurityFilterChain.html) 被 [FilterChainProxy](https://springdoc.cn/spring-security/servlet/architecture.html#servlet-filterchainproxy) 用来确定当前请求应该调用哪些 Spring Security `Filter` 实例。在 Spring Security 的配置中，可以定义多个过滤器链，每个过滤器链可以包含不同的过滤器集合，并且每个链可以匹配特定的请求路径或模式。
+
+SpringSecurity 对 servelt的支持是基于Servlet过滤器的 ，过滤器可以有很多个。
+
+![securityfilterchain](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-87a3cf755d8d38418f97d6bfc922c035.png)
+
+
+
+客户端向应用程序发送一个请求，容器创建一个 `FilterChain`，其中包含 `Filter` 实例和 `Servlet`，应该根据请求URI的路径来处理 `HttpServletRequest`。在Spring MVC应用程序中，Servlet是 [`DispatcherServlet`](https://docs.spring.io/spring-framework/docs/6.1.0-M2/reference/html/web.html#mvc-servlet) 的一个实例。一个 `Servlet` 最多可以处理一个 `HttpServletRequest` 和 `HttpServletResponse`。然而，可以使用多个 `Filter` 来完成如下工作。
+
+- 防止下游的 `Filter` 实例或 `Servlet` 被调用。在这种情况下，`Filter` 通常会使用 `HttpServletResponse` 对客户端写入响应。
+- 修改下游的 `Filter` 实例和 `Servlet` 所使用的 `HttpServletRequest` 或 `HttpServletResponse`。
+
+过滤器的力量来自于传入它的 `FilterChain`：
+
+```java
+public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
+	// do something before the rest of the application
+    chain.doFilter(request, response); // invoke the rest of the application
+    // do something after the rest of the application
+}
+```
+
+
+
+`SecurityFilterChain` 中的 [Security Filter](https://springdoc.cn/spring-security/servlet/architecture.html#servlet-security-filters) 通常是Bean，但它们是用 `FilterChainProxy` 而不是 [DelegatingFilterProxy](https://springdoc.cn/spring-security/servlet/architecture.html#servlet-delegatingfilterproxy) 注册的。与直接向Servlet容器或 [DelegatingFilterProxy](https://springdoc.cn/spring-security/servlet/architecture.html#servlet-delegatingfilterproxy) 注册相比，`FilterChainProxy` 有很多优势。
+
++ 首先，它为 Spring Security 的所有 Servlet 支持提供了一个起点。由于这个原因，如果你试图对 Spring Security 的 Servlet 支持进行故障诊断，在 `FilterChainProxy` 中添加一个调试点是一个很好的开始。
+
++ 其次，由于 `FilterChainProxy` 是 Spring Security 使用的核心，它可以执行一些不被视为可有可无的任务。 例如，它清除了 `SecurityContext` 以避免内存泄漏。它还应用Spring Security的 [`HttpFirewall`](https://springdoc.cn/spring-security/servlet/exploits/firewall.html#servlet-httpfirewall) 来保护应用程序免受某些类型的攻击。
+
++ 此外，它在确定何时应该调用 `SecurityFilterChain` 方面提供了更大的灵活性。在Servlet容器中，`Filter` 实例仅基于URL被调用。 然而，`FilterChainProxy` 可以通过使用 `RequestMatcher` 接口，根据 `HttpServletRequest` 中的任何内容确定调用。（就是可以非常精细的指定哪些url将被filter拦截）
+
+有个需要特别注意的点：**一个**`FilterCHainProxy`可以配置多个`Filter`，但是**只执行第一个匹配的`FIlter`**，剩下的`Filter`或通过`chain.doFilter`的调用而顺序执行。`SpringSecurity`的实现就是基于**一个** `FilterProxyChain`；
+
+
+
+`SecurityFilter`通过 `SecurityFilterChain`这个API插入到 `FilterChainProxy`中，这些 filter 可以用于许多不同的目的，如 [认证](https://springdoc.cn/spring-security/servlet/authentication/index.html)、 [授权](https://springdoc.cn/spring-security/servlet/authorization/index.html)、 [漏洞保护](https://springdoc.cn/spring-security/servlet/exploits/index.html) 等等。filter 是按照特定的顺序执行的，以保证它们在正确的时间被调用，例如，执行认证的 `Filter` 应该在执行授权的 `Filter` 之前被调用。一般来说，没有必要知道 Spring Security 的 `Filter` 的顺序。
+
+```java
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(Customizer.withDefaults())
+            .authorizeHttpRequests(authorize -> authorize
+                .anyRequest().authenticated()
+            )
+            .httpBasic(Customizer.withDefaults())
+            .formLogin(Customizer.withDefaults());
+        return http.build();
+    }
+
+}
+```
+
+上述配置中的 `Filter` 顺序如下：
+
+| Filter                                                       | 添加者                               |
+| :----------------------------------------------------------- | :----------------------------------- |
+| [CsrfFilter](https://springdoc.cn/spring-security/servlet/exploits/csrf.html) | `HttpSecurity#csrf`                  |
+| [UsernamePasswordAuthenticationFilter](https://springdoc.cn/spring-security/servlet/authentication/passwords/form.html#servlet-authentication-form) | `HttpSecurity#formLogin`             |
+| [BasicAuthenticationFilter](https://springdoc.cn/spring-security/servlet/authentication/passwords/basic.html) | `HttpSecurity#httpBasic`             |
+| [AuthorizationFilter](https://springdoc.cn/spring-security/servlet/authorization/authorize-http-requests.html) | `HttpSecurity#authorizeHttpRequests` |
+
+1. 首先，调用 `CsrfFilter` 来防止 [CSRF 攻击](https://springdoc.cn/spring-security/servlet/exploits/csrf.html)。
+2. 其次，认证 filter 被调用以认证请求。
+3. 第三，调用 `AuthorizationFilter` 来授权该请求。
+
+### 自定义Filter
+
+```java
+public class TenantFilter implements Filter {
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+
+        String tenantId = request.getHeader("X-Tenant-Id");
+        boolean hasAccess = isUserAllowed(tenantId);
+        if (hasAccess) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        throw new AccessDeniedException("Access denied");
+    }
+
+}
+```
+
+注册进 `SecurityFilterChain`：
+
+```java
+@Bean
+SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    http
+        // 第二个参数 配合 addFilterBefore可以确保，当前过滤器添加到 AuthorizationFilter之前；
+        .addFilterBefore(new TenantFilter(),AuthorizationFilter.Class);
+    return http.build();
+}
+```
+
+这里需要注意，当你把你的 filter 声明为 Spring Bean 时要小心，可以用 `@Component` 注解它，也可以在配置中把它声明为 Bean，因为 Spring Boot 会自动 [在嵌入式容器中注册它](https://docs.spring.io/spring-boot/docs/3.1.1/reference/html/web.html#web.servlet.embedded-container.servlets-filters-listeners.beans)。这可能会导致 filter 被调用两次，一次由容器调用，一次由 Spring Security 调用，而且顺序不同。因此对于自定义的`Filter`类，我们将其声明称普通类就行，不要声明成组件；
+
+### 几个主要的过滤器
+
+![Spring Security — The Security Filter Chain | by Kasun Dissanayake | Medium](https://miro.medium.com/v2/resize:fit:1400/1*kdfpQR9jkiYbHID9kOfzIQ.jpeg)
+
+
+
+![Spring Security JWT Tutorial | Toptal®](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-952930c83f53503d7e84d1371bec3775.png)
+
+具体执行图如下：
+
+![img](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-66aadb815f300da689c34038af48ebbf.png)
+
+
+
+
+
+**UsernamePasswordAuthenticationFilter**：该过滤器用于获取用户输入的用户名和密码，并将其封装在UsernamePasswordAuthenticationToken对象中。它还检查用户输入的凭据是否正确，并将其发送到AuthenticationManager进行身份验证。
+
+**BasicAuthenticationFilter**：该过滤器用于处理基本认证，即通过HTTP消息头传递的用户名和密码。在进行基本认证时，前端应用程序会将用户凭据(base64编码的)添加到HTTP请求标头中。BasicAuthenticationFilter在此通过解码这些凭据并将其发送到AuthenticationManager进行身份验证。
+
+**SecurityContextHolderAwareRequestFilter**：该过滤器用于包装HttpServletRequest对象，以便将其传递到Spring Security的AuthenticationAwareWebInvocationPrivilegeEvaluator。这主要是用于在页面或JavaScript中检查是否已经经过身份验证。
+
+**AnonymousAuthenticationFilter**：该过滤器负责提供匿名身份验证机制。如果用户未经过身份验证，则该过滤器会向SecurityContext注入一个AnonymousAuthenticationToken对象。
+
+**SessionManagementFilter**：该过滤器管理用户的会话，包括创建新的会话、检查会话是否过期以及将会话绑定到用户的身份验证，以防止会话劫持攻击。
+
+**ExceptionTranslationFilter**：该过滤器处理由其他过滤器抛出的异常。它查找最合适的异常处理程序，例如包含特定响应头和状态代码的RESTful API异常处理程序或进行页面重定向的MVC样式的异常处理程序。
+
+**FilterSecurityInterceptor**：该过滤器在处理请求之前检查当前用户是否具有所请求的资源的访问权限。如果用户没有权限，则FilterSecurityInterceptor将阻止请求并返回HTTP 403 Forbidden响应。这个拦截器位于整个过滤器链的末端。当对请求进行拦截后，下一步是获取请求的访问资源，以及访问这些资源所需要的权限信息，判断是否有权限访问，主要是其中的`AccessDecisionVoter`方法进行确定。
+
+
+
+在security处理的流程中会有几个主要的类：
+
++ Authentication：封装认证信息
++ ConfigAttribute：用户请求一个资源(通常是一个接口或者一个 Java 方法)需要的⻆色会被封装成一个 ConfigAttribute 对象，在ConfigAttribute 中只有一个 getAttribute方法，该方法返回一个 String 字符
+
+## 处理Security异常
+
+### ExceptionTranslationFilter
+
+提供了一个非常特殊的`Filter`专门用来处理异常，流程如下：
+
+![exceptiontranslationfilter](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-912781f48a38cd67b4c15b1640be2bfd.png)
+
+- 首先，`ExceptionTranslationFilter` 调用 `FilterChain.doFilter(request, response)` 来调用应用程序的其他部分。
+-  如果用户没有被认证，或者是一个 `AuthenticationException`，那么就 *开始认证*。
+    - [SecurityContextHolder](https://springdoc.cn/spring-security/servlet/authentication/architecture.html#servlet-authentication-securitycontextholder) 被清理掉。
+    - `HttpServletRequest` 被[保存](https://springdoc.cn/spring-security/servlet/architecture.html#savedrequests)起来，这样一旦认证成功，它就可以用来重放原始请求。
+    - `AuthenticationEntryPoint` 用于请求客户的凭证。例如，它可以重定向到一个登录页面或发送一个 `WWW-Authenticate` 头。
+- 否则，如果是 `AccessDeniedException`，那么就是 *Access Denied*。 `AccessDeniedHandler` 被调用来处理拒绝访问（access denied）
+
+官方给出了它的伪代码：
+
+```java
+try {
+	filterChain.doFilter(request, response);
+} catch (AccessDeniedException | AuthenticationException ex) {
+	if (!authenticated || ex instanceof AuthenticationException) {
+		startAuthentication();
+	} else {
+		accessDenied();
+	}
+}
+```
+
+
+
+### 异常打印
+
+一个用户试图向一个启用了 [CSRF保护](https://springdoc.cn/spring-security/servlet/exploits/csrf.html) 的资源发出一个 `POST` 请求，但没有CSRF令牌。在没有日志的情况下，用户会看到一个 403 错误，没有解释为什么请求被拒绝。然而，如果你为 Spring Security 启用了日志，并且日志等级设置为：
+
+properties：
+
+```xml
+logging.level.org.springframework.security=TRACE
+```
+
+并且设置`logback.xml`：
+
+```xml
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- ... -->
+    </appender>
+    <!-- ... -->
+    <logger name="org.springframework.security" level="trace" additivity="false">
+        <appender-ref ref="Console" />
+    </logger>
+</configuration>
+```
+
+## 保存未认证请求
+
+当一个请求没有认证，并且是针对需要认证的资源时，有必要保存认证资源的请求，以便在认证成功后重新请求。在Spring Security中，这是通过使用 [`RequestCache`](https://springdoc.cn/spring-security/servlet/architecture.html#requestcache) 实现来保存 `HttpServletRequest` 的。
+
+### RequestCache
+
+`HttpServletRequest` 被保存在 [`RequestCache`](https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/web/savedrequest/RequestCache.html)。当用户成功认证后，`RequestCache` 被用来重放原始请求。[`RequestCacheAwareFilter`](https://springdoc.cn/spring-security/servlet/architecture.html#requestcacheawarefilter) 就是使用 `RequestCache` 来保存 `HttpServletRequest` 的。
+
+具体配置方法如下：
+
+```java
+@Bean
+DefaultSecurityFilterChain springSecurity(HttpSecurity http) throws Exception {
+	HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+	requestCache.setMatchingRequestParameterName("continue");
+	http
+		// ...
+		.requestCache((cache) -> cache
+			.requestCache(requestCache)
+		);
+	return http.build();
+}
+```
+
+
+
+## 从自动配置角度学习
+
+Spring Boot通过@EnableAutoConfiguration注解开启自动配置，加载spring.factories中注册的各种AutoConfiguration类，当某个AutoConfiguration类满足其注解@Conditional指定的生效条件时，实例化该AutoConfiguration类中定义的Bean，并注入Spring容器，就可以完成依赖框架的自动配置
+
+对于 `security`来说：
+
+首先，加载org.springframework.boot.autoconfigure包下META-INF/spring.factories中注册的key=org.springframework.boot.autoconfigure.EnableAutoConfiguration，value=SecurityAutoConfiguration的自动配置类：
+
+```# Auto Configure
+...
+org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,\
+org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration,\
+...
+```
+
+分析来看，SpringSecurity默认生效的配置为：
+
+```java
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnDefaultWebSecurity
+@ConditionalOnWebApplication(type = Type.SERVLET)
+class SpringBootWebSecurityConfiguration {
+
+   @Bean
+   @Order(SecurityProperties.BASIC_AUTH_ORDER)
+   SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+      http.authorizeRequests()
+           // 对所有的请求开启权限认证,认证之后才能访问
+          .anyRequest().authenticated()
+          .and()
+           // 支持表单认证
+          .formLogin()
+          .and()
+           // 支持basic认证
+          .httpBasic();
+      return http.build();
+   }
+}
+
+```
+
+
+
+对于老版本的 `security`来说：
+
+WebSecurityConfigurerAdapter 这个类极其重要，Spring Security 核心配置都在这个类中，
+如果想要扩展SpringSecurity的相关配置，可以在项目中自定义配置类继承WebSecurityConfigurerAdapter类或者实现SecurityFilterChain接口，这样操作都会覆盖掉上面的默认配置，SpringBoot 将所有的扩展配置都放在了WebSecurityConfigurerAdapter和SecurityFilterChain中。如果改配置可以扩展WebSecurityConfigurerAdapter，如果自定义过滤器可以扩展SecurityFilterChain。![在这里插入图片描述](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-6d17f2fc6ac5e258905414957a89403d.png)
+
+### 默认登录界面
+
+![在这里插入图片描述](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-6073776ab1a28839067331af4497d2c0.png)
+
+1.请求 /hello 接口，在引入 spring security 之后会先经过一些列过滤器
+2.在请求到达 `FilterSecurityInterceptor`时，发现请求并未认证。请求拦截下来，并抛出AccessDeniedException 异常。
+3.抛出 AccessDeniedException 的异常会被 ExceptionTranslationFilter 捕获，这个 Filter 中会调用 LoginUrlAuthenticationEntryPoint#commence方法给客户端返回 302，要求客户端进行重定向到 /login ⻚面。
+4.客户端发送 /login 请求。
+5./login 请求会再次被拦截器中 `DefaultLoginPageGeneratingFilter` 拦截到，并在拦截器中返回生成登录⻚面。
+
+### 默认认证数据源
+
+![image-20241010151332364](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-6ce76b645ce63951e1dcee9663844697.png)
+
+从自动配置类中的fromLogin()，配置我们继续跟进，直到最终实现代码：
+
+```java
+public class UsernamePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+    
+    private AuthenticationManager authenticationManager;
+
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+        throws AuthenticationException {
+        // 1、判断是否是 post 请求方式；
+        if (this.postOnly && !request.getMethod().equals("POST")) {
+            throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
+        }
+        // 2、从请求中根据表单name属性的值获取用户名 username
+        String username = obtainUsername(request);
+        username = (username != null) ? username : "";
+        username = username.trim();
+        // 3、从请求中根据表单name属性的值获取密码 password
+        String password = obtainPassword(request);
+        password = (password != null) ? password : "";
+        // 4、将 username 和 password 封装成 UsernamePasswordAuthenticationToken
+        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, password);
+        setDetails(request, authRequest);
+        // 5、调用 AuthenticationManager 中的 authenticate 方法完成身份认证
+        return this.getAuthenticationManager().authenticate(authRequest);
+    }
+
+    @Nullable
+    protected String obtainPassword(HttpServletRequest request) {
+        return request.getParameter(this.passwordParameter);
+    }
+
+    @Nullable
+    protected String obtainUsername(HttpServletRequest request) {
+        return requesta.getParameter(this.usernameParameter);
+    }
+
+    protected AuthenticationManager getAuthenticationManager() {
+        return this.authenticationManager;
+    }
+}
+
+```
+
+具体流程：
+
+1.判断是否是 post 请求方式；
+
+2.从请求中根据表单 name 属性的值获取用户名 username；
+
+3.从请求中根据表单 name 属性的值获取密码 password；
+
+4.将 username 和 password 封装成 UsernamePasswordAuthenticationToken authRequest；
+
+5.调用 AuthenticationManager 接口中的 authenticate(authRequest) 方法完成身份认证；
+
+6.AuthenticationManager 接口中的 authenticate 方法完成身份认证
+
+
+
+了解一下 `AuthenticationManager`接口：
+
+在上述方法中通过 AuthenticationManager 接口中的 authenticate(authRequest) 方法完成身份认证，事实上，AuthenticationManager 是认证相关的顶层接口，该接口中只有一个 authenticate 方法，参数是一个包含认证信息的不完整的 Authentication 对象，响应是一个包含凭据的完整 的Authentication 对象；
+```java
+public interface AuthenticationManager {
+   Authentication authenticate(Authentication authentication) throws AuthenticationException;
+}
+```
+
+`ProviderManager`是`AuthenticationManager`的子类，是最终调用的认证方法：
+
+```java
+public class ProviderManager implements AuthenticationManager, MessageSourceAware, InitializingBean {
+
+    // AuthenticationManager 接口
+    private AuthenticationManager parent;
+
+    // 存储AuthenticationProvider接口实现类的List集合
+    private List<AuthenticationProvider> providers = Collections.emptyList();
+
+    /**
+     * @param authentication 待认证的对象
+     * @return Authentication 认证成功后填充的对象
+    */
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        Class<? extends Authentication> toTest = authentication.getClass();
+        AuthenticationException lastException = null;
+        AuthenticationException parentException = null;
+        Authentication result = null;
+        Authentication parentResult = null;
+        int currentPosition = 0;
+        int size = this.providers.size();
+		// 遍历providers集合
+        // 如果该providers中如果有一个AuthenticationProvider 的 supports 方法返回 true
+        // 那么就会调用该 AuthenticationProvider 的 authenticate 方法认证
+        // 如果认证成功则整个认证过程结束。
+        // 如果不成功，则继续使用下一个合适的AuthenticationProvider进行认证
+        // 只要有一个认证成功则为认证成功。
+        for (AuthenticationProvider provider : getProviders()) {
+            if (!provider.supports(toTest)) {
+                continue;
+            }
+            try {
+                result = provider.authenticate(authentication);
+                if (result != null) {
+                    copyDetails(authentication, result);
+                    break;
+                }
+            }catch (AccountStatusException | InternalAuthenticationServiceException ex) {
+                prepareException(ex, authentication);
+                throw ex;
+            }catch (AuthenticationException ex) {
+                lastException = ex;
+            }
+        }
+        // 如果上述过程没有认证成功，result==null。
+        // 并且 AuthenticationManager parent != null，那么会使用该 parent 继续认证。
+        if (result == null && this.parent != null) {
+            // Allow the parent to try.
+            try {
+                // 回调AuthenticationManager接口实现类ProviderManager中的该方法
+                parentResult = this.parent.authenticate(authentication);
+                result = parentResult;
+            }catch (ProviderNotFoundException ex) {
+            }catch (AuthenticationException ex) {
+                parentException = ex;
+                lastException = ex;
+            }
+        }
+        // 省略...
+    }
+    
+    public List<AuthenticationProvider> getProviders() {
+        return this.providers;
+    }
+}
+
+```
+
+该方法会遍历 List<AuthenticationProvider> providers 集合获取 AuthenticationProvider 的实现类完成认证，如果该 providers 中如果有一个 AuthenticationProvider 的 supports 方法返回 true，那么就会调用该 AuthenticationProvider 的 authenticate 方法认证，如果认证成功则整个认证过程结束。如果不成功，则继续使用下一个合适的 AuthenticationProvider 进行认证，只要有一个认证成功则为认证成功。
+
+如果上述过程没有认证成功，且该ProviderManager的成员变量AuthenticationManager parent不为null，那么会使用该 parent 继续认证
+
+组成关系很明确：
+
+![在这里插入图片描述](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-a58e71111ef6e867cdbe58bcf4c0c93b.png)
+
+那么 `AuthenticationProvider`又是什么呢？
+
+AuthenticationProvider接口和AuthenticationManager接口很相似，只多了一个supports方法，该接口通常是提供给开发人员实现，可以实现自定义的安全认证方式：
+
+```java
+public interface AuthenticationProvider {
+   // 认证方法
+   Authentication authenticate(Authentication authentication) throws AuthenticationException;
+   // 验证是否支持某种身份认证方式；
+   boolean supports(Class<?> authentication);
+}
+```
+
+我们看一下 `Authentication`类的对象（待认证对象）：
+
+![在这里插入图片描述](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-ef496678c01a97fa4ad149ea44dcaa6b.png)
+
+既然AuthenticationProvider也是接口，我们看啊可能他的实现类 `AnonymousAuthenticationProvider`：
+
+````java
+// 匿名身份验证提供程序
+public class AnonymousAuthenticationProvider implements AuthenticationProvider, MessageSourceAware {
+   // ... 省略代码
+    
+   @Override
+   public boolean supports(Class<?> authentication) {
+      // 判断AnonymousAuthenticationToken对象是否是authentication对象的父类或接口
+      // 判断AnonymousAuthenticationToken对象和authentication对象是否是同一个类或者同一个接口
+      return (AnonymousAuthenticationToken.class.isAssignableFrom(authentication));
+   }
+}
+````
+
+还有一个 `DaoAuthenticationProvider`， 继承抽象类 AbstractUserDetailsAuthenticationProvider;
+
+还得执行其中的`supports`方法：
+
+```java
+public abstract class AbstractUserDetailsAuthenticationProvider
+    implements AuthenticationProvider, InitializingBean, MessageSourceAware {
+    
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
+    }
+}
+```
+
+返回True，则执行其中的`authenticate`方法看，执行 UsernamePasswordAuthenticationToken 的认证：
+
+因为DaoAuthenticationProvider继承自抽象类 AbstractUserDetailsAuthenticationProvider ，因此实际调用的是 AbstractUserDetailsAuthenticationProvider 类的 authenticate 方法；
+
+```java
+public abstract class AbstractUserDetailsAuthenticationProvider
+    implements AuthenticationProvider, InitializingBean, MessageSourceAware {
+
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        String username = determineUsername(authentication);
+        boolean cacheWasUsed = true;
+        // 先从缓存中获取认证成功的UserDeails对象
+        UserDetails user = this.userCache.getUserFromCache(username);
+        // 如果缓存中不存在
+        if (user == null) {
+            cacheWasUsed = false;
+            try {
+                // 从数据源中获取 
+                user = retrieveUser(username, (UsernamePasswordAuthenticationToken) authentication);
+            } // ...
+        }
+        // ...
+        // 将认证成功的UserDetails对象放入缓存中
+        if (!cacheWasUsed) {
+            this.userCache.putUserInCache(user);
+        }
+        // ...
+    }     
+}
+
+```
+
+
+
+## 从自动配置的案例学习
+
+默认请求携带如下的token：
+
+![image-20241011203709732](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-09ba8648427d8db996836bfce772bbcb.png)
+
+
+
+官网给出了一个非常重要的逻辑图：（从宏观角度出发：基于表单登录）
+
+![123](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-10-ef0b5899249f0697e734dbd0a6639255.png)
+
+这时候很多人可能想去从代码角度了解这些个具体是怎么实现的，但是别忘了，我们只是框架的使用者，并且看了大概率也看不懂，因为这毕竟是几百个人智慧的结晶，里面涉及到了非常多的API，自己琢磨大概率一知半解，不要一股脑突突源码；
+
+
+
+数据库表设计（这个非常重要！！！）：当前最流行的权限控制模式为 `RBAC`(role based access control)，基于角色的权限控制，关于其表定义具有普适性：
+
+```java
+-- 当前流行的权限控制系统 RBAC 模式,所以数据库表设计基于 RBAC
+drop database if exists rbac;
+-- 创建数据库
+CREATE DATABASE if not exists rbac DEFAULT CHARACTER SET utf8 ;
+use rbac;
+-- 用户表
+CREATE TABLE user(
+                     user_id     BIGINT          NOT NULL    PRIMARY KEY     AUTO_INCREMENT      COMMENT '用户ID主键',
+                     user_phone       VARCHAR(50)     NOT NULL    UNIQUE                              COMMENT '手机号，唯一',
+                     user_password    VARCHAR(255)    NOT NULL                                        COMMENT '密码',
+                     user_name    VARCHAR(100)    NOT NULL                                        COMMENT '用户名'
+)AUTO_INCREMENT=1000 DEFAULT charset=utf8 COMMENT='用户表';
+-- 角色表
+CREATE TABLE role(
+                     role_id     BIGINT          NOT NULL    PRIMARY KEY     AUTO_INCREMENT      COMMENT '角色ID主键',
+                     role_name   VARCHAR(100)    NOT NULL                                        COMMENT '角色名'
+)AUTO_INCREMENT=1000 DEFAULT charset=utf8 COMMENT='角色表';
+-- 权限表
+CREATE TABLE permission(
+                           permission_id     BIGINT          NOT NULL    PRIMARY KEY     AUTO_INCREMENT      COMMENT '权限ID主键',
+                           permission_name   VARCHAR(100)    NOT NULL                                        COMMENT '权限名'
+)AUTO_INCREMENT=1000 DEFAULT charset=utf8 COMMENT='权限表';
+-- 用户角色关联表
+CREATE TABLE user_role(
+                            id          BIGINT  NOT NULL   PRIMARY KEY AUTO_INCREMENT COMMENT 'ID',
+                          user_id     BIGINT  NOT NULL   COMMENT '用户ID',
+                          role_id     BIGINT  NOT NULL   COMMENT '角色ID'
+) auto_increment=1000 DEFAULT charset=utf8 COMMENT='用户角色关联表';
+-- 角色权限关联表
+CREATE TABLE role_permission(
+                                id                  BIGINT  NOT NULL   PRIMARY KEY AUTO_INCREMENT COMMENT 'ID',
+                                role_id             BIGINT  NOT NULL   COMMENT '角色ID',
+                                permission_id       BIGINT  NOT NULL   COMMENT '权限ID'
+)auto_increment=1000 DEFAULT charset=utf8 COMMENT='角色权限关联表';
+
+```
+
+
+
+
+
+1、学习官方使用的InMemoryUserDetailsManager构造我们自己定义的 `LoginUserDetails`，同样的实现 `UserDetails`接口；里面的逻辑判断啥的我们都可以照抄过来；
+
+然后发现需要返回一个继承`UserDetails`接口的对象，因此我们还要自定义一个 `LoginUserDetails`用于构造返回对象；
+
+
+
+
+
+# Spring Cloud
+
+
+
+
+
+Spring是JavaEE的一个轻量级开发框架，主营IoC和AOP，集成JDBC、ORM、MVC等功能便于开发。
+
+Spring Boot是基于Spring，提供开箱即用的积木式组件，目的是提升开发效率。
+
+那么Spring Cloud是啥？
+
+cloud就是云相关，其实就是为了让分布式应用编写更加方便而提供的一组基础设施，他的核心是Spring框架，利用SpringBoot的自动配置，力图实现最简化的分布式程序开发；
+
+Spring Cloud 包含了一大堆技术组件，既有开源社区开发的组件，也有商业公司开发的组件。
+
+
+
