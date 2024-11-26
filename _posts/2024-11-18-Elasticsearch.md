@@ -6,7 +6,6 @@ date: 2024-11-18 10:40:06
 
 categories: Elasticsearch
 
-
 ---
 
 笔记来源：https://github.com/limingzhong61/LearningNotes，由于其笔记过于完善，本人仅增加了略微修改
@@ -189,7 +188,7 @@ elasticsearch底层是基于**lucene**来实现的。
 
 虽然要先查询倒排索引，再查询倒排索引，但是无论是词条、还是文档id都建立了索引，查询速度非常快！无需全表扫描。
 
-![image-20210902160701197](分布式搜索引擎01/image-20210902160701197.png)
+![image-20210902160701197](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210902160701197.png)
 
 #### 1.2.3.正向和倒排
 
@@ -293,7 +292,7 @@ elasticsearch是面向**文档（Document）**存储的，可以是**数据库�
 
 ![image-20210720203534945](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210720203534945.png)
 
-![image-20210902161840028](分布式搜索引擎01/image-20210902161840028.png)
+![image-20210902161840028](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210902161840028.png)
 
 
 
@@ -961,7 +960,7 @@ copy_to说明：
 
 
 
-2）因为SpringBoot默认的ES版本是7.6.2，所以我们**需要覆盖默认的ES版本**：
+2）因为SpringBoot默认的ES版本是7.6.2，所以我们**需要覆盖默认的ES版本**,引入的ElasticSearch版本应该和我们安装的ElasticSearch版本一致
 
 ```xml
 <properties>
@@ -1790,7 +1789,7 @@ GET /hotel/_search
 
 因为我们将brand、name、business值都利用copy_to复制到了all字段中。因此你根据三个字段搜索，和根据all字段搜索效果当然一样了。
 
-但是，搜索字段越多，对查询性能影响越大，因此建议采用copy_to，然后单字段查询的方式。
+**但是，搜索字段越多，对查询性能影响越大，因此建议采用copy_to，然后单字段查询的方式。**
 
 
 
@@ -2042,7 +2041,7 @@ GET /hotel/_search
 
 ### 1.5.复合查询
 
-复合（compound）查询：复合查询可以将其它简单查询组合起来，实现更复杂的搜索逻辑。常见的有两种：
+复合（compound）查询：复合查询可以**将其它简单查询组合起来，实现更复杂的搜索逻辑**。常见的有两种：
 
 - fuction score：算分函数查询，可以控制文档相关性算分，控制文档排名
 - bool query：布尔查询，利用逻辑关系组合多个其它的查询，实现复杂搜索
@@ -2086,7 +2085,7 @@ GET /hotel/_search
 
 
 
-在后来的5.1版本升级中，elasticsearch将算法改进为BM25算法，公式如下：
+在后来的5.1版本升级中，elasticsearch将算法改进为**BM25算法**，公式如下：
 
 ![image-20210721190416214](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721190416214.png)
 
@@ -2094,7 +2093,7 @@ GET /hotel/_search
 
 
 
-TF-IDF算法有一各缺陷，就是词条频率越高，文档得分也会越高，单个词条对文档影响较大。而BM25则会让单个词条的算分有一个上限，曲线更加平滑：
+**TF-IDF算法有一各缺陷，就是词条频率越高，文档得分也会越高，单个词条对文档影响较大。而BM25则会让单个词条的算分有一个上限**，曲线更加平滑：
 
 ![image-20210721190907320](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721190907320.png)
 
@@ -2117,7 +2116,7 @@ TF-IDF算法有一各缺陷，就是词条频率越高，文档得分也会越�
 
 
 
-要想认为控制相关性算分，就需要利用elasticsearch中的function score 查询了。
+要想人为控制相关性算分，就需要利用elasticsearch中的function score 查询了。
 
 
 
@@ -2499,7 +2498,7 @@ GET /hotel/_search
 
 假设我的位置是：31.034661，121.612282，寻找我周围距离最近的酒店。
 
-![image-20210721200214690](分布式搜索引擎01/image-20210721200214690.png)
+![image-20210721200214690](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721200214690.png)
 
 
 
@@ -2762,7 +2761,7 @@ GET /hotel/_search
 
 
 
-这里关键的API有两个，一个是`request.source()`，其中包含了查询、排序、分页、高亮等所有功能：
+这里关键的API有两个，一个是`request.source()`，其中包含了排序、分页、高亮等所有功能：
 
 ![image-20210721215640790](https://raw.githubusercontent.com/mikeaaaaaa/cloudimg/main/img/2024-11-30f6625172c4ed8c28db7bafaaf251ba.png)
 
@@ -2861,13 +2860,13 @@ private void handleResponse(SearchResponse response) {
 
 全文检索的match和multi_match查询与match_all的API基本一致。差别是查询条件，也就是query的部分。
 
-![image-20210721215923060](分布式搜索引擎01/image-20210721215923060.png) 
+![image-20210721215923060](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721215923060.png) 
 
 
 
 因此，Java代码上的差异主要是request.source().query()中的参数了。同样是利用QueryBuilders提供的方法：
 
-![image-20210721215843099](分布式搜索引擎01/image-20210721215843099.png) 
+![image-20210721215843099](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721215843099.png) 
 
 而结果解析代码则完全一致，可以抽取并共享。
 
@@ -2906,7 +2905,7 @@ void testMatch() throws IOException {
 
 查询条件构造的API如下：
 
-![image-20210721220305140](分布式搜索引擎01/image-20210721220305140.png) 
+![image-20210721220305140](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721220305140.png) 
 
 
 
@@ -2916,7 +2915,7 @@ void testMatch() throws IOException {
 
 布尔查询是用must、must_not、filter等方式组合其它查询，代码示例如下：
 
-![image-20210721220927286](分布式搜索引擎01/image-20210721220927286.png)
+![image-20210721220927286](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721220927286.png)
 
 
 
@@ -2956,7 +2955,7 @@ void testBool() throws IOException {
 
 对应的API如下：
 
-![image-20210721221121266](分布式搜索引擎01/image-20210721221121266.png)
+![image-20210721221121266](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721221121266.png)
 
 
 
@@ -2998,7 +2997,7 @@ void testPageAndSort() throws IOException {
 
 高亮请求的构建API如下：
 
-![image-20210721221744883](分布式搜索引擎01/image-20210721221744883.png)
+![image-20210721221744883](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721221744883.png)
 
 上述代码省略了查询条件部分，但是大家不要忘了：高亮查询必须使用全文检索查询，并且要有搜索关键字，将来才可以对关键字高亮。
 
@@ -3030,7 +3029,7 @@ void testHighlight() throws IOException {
 
 因此解析高亮的代码需要额外处理：
 
-![image-20210721222057212](分布式搜索引擎01/image-20210721222057212.png)
+![image-20210721222057212](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721222057212.png)
 
 代码解读：
 
@@ -3095,7 +3094,7 @@ private void handleResponse(SearchResponse response) {
 
 启动我们提供的hotel-demo项目，其默认端口是8089，访问http://localhost:8090，就能看到项目页面了：
 
-![image-20210721223159598](分布式搜索引擎01/image-20210721223159598.png)
+![image-20210721223159598](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/image-20210721223159598.png)
 
 
 
@@ -3109,15 +3108,15 @@ private void handleResponse(SearchResponse response) {
 
 在项目的首页，有一个大大的搜索框，还有分页按钮：
 
-![image-20210721223859419](分布式搜索引擎01/image-20210721223859419.png)
+![image-20210721223859419](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721223859419.png)
 
 点击搜索按钮，可以看到浏览器控制台发出了请求：
 
-![image-20210721224033789](分布式搜索引擎01/image-20210721224033789.png)
+![image-20210721224033789](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721224033789.png)
 
 请求参数如下：
 
-![image-20210721224112708](分布式搜索引擎01/image-20210721224112708.png)
+![image-20210721224112708](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721224112708.png)
 
 
 
@@ -3349,11 +3348,11 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
 
 在页面搜索框下面，会有一些过滤项：
 
-![image-20210722091940726](分布式搜索引擎01/image-20210722091940726.png)
+![image-20210722091940726](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722091940726.png)
 
 传递的参数如图：
 
-![image-20210722092051994](分布式搜索引擎01/image-20210722092051994.png) 
+![image-20210722092051994](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722092051994.png) 
 
 包含的过滤条件有：
 
@@ -3411,7 +3410,7 @@ public class RequestParams {
 
 因为条件构建的逻辑比较复杂，这里先封装为一个函数：
 
-![image-20210722092935453](分布式搜索引擎01/image-20210722092935453.png)
+![image-20210722092935453](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722092935453.png)
 
 
 
@@ -3465,11 +3464,11 @@ private void buildBasicQuery(RequestParams params, SearchRequest request) {
 
 在酒店列表页的右侧，有一个小地图，点击地图的定位按钮，地图会找到你所在的位置：
 
-![image-20210722093414542](分布式搜索引擎01/image-20210722093414542.png) 
+![image-20210722093414542](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722093414542.png) 
 
 并且，在前端会发起查询请求，将你的坐标发送到服务端：
 
-![image-20210722093642382](分布式搜索引擎01/image-20210722093642382.png) 
+![image-20210722093642382](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722093642382.png) 
 
 
 
@@ -3540,7 +3539,7 @@ GET /indexName/_search
 
 对应的java代码示例：
 
-![image-20210722095227059](分布式搜索引擎01/image-20210722095227059.png)
+![image-20210722095227059](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722095227059.png)
 
 
 
@@ -3550,7 +3549,7 @@ GET /indexName/_search
 
 在`cn.itcast.hotel.service.impl`的`HotelService`的`search`方法中，添加一个排序功能：
 
-![image-20210722095902314](分布式搜索引擎01/image-20210722095902314.png)
+![image-20210722095902314](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722095902314.png)
 
 
 
@@ -3597,7 +3596,7 @@ public PageResult search(RequestParams params) {
 
 重启服务后，测试我的酒店功能：
 
-![image-20210722100040674](分布式搜索引擎01/image-20210722100040674.png)
+![image-20210722100040674](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722100040674.png)
 
 
 
@@ -3607,7 +3606,7 @@ public PageResult search(RequestParams params) {
 
 排序完成后，页面还要获取我附近每个酒店的具体**距离**值，这个值在响应结果中是独立的：
 
-![image-20210722095648542](分布式搜索引擎01/image-20210722095648542.png)
+![image-20210722095648542](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722095648542.png)
 
 因此，我们在结果解析阶段，除了解析source部分以外，还要得到sort部分，也就是排序的距离，然后放到响应结果中。
 
@@ -3665,7 +3664,7 @@ public class HotelDoc {
 
 2）修改HotelService中的handleResponse方法
 
-![image-20210722100613966](分布式搜索引擎01/image-20210722100613966.png)
+![image-20210722100613966](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722100613966.png)
 
 ```java
 // 结果解析
@@ -3702,7 +3701,7 @@ public class HotelDoc {
 
 重启后测试，发现页面能成功显示距离了：
 
-![image-20210722100838604](分布式搜索引擎01/image-20210722100838604.png)
+![image-20210722100838604](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722100838604.png)
 
 
 
@@ -3716,7 +3715,7 @@ public class HotelDoc {
 
 要让指定酒店在搜索结果中排名置顶，效果如图：
 
-![image-20210722100947292](分布式搜索引擎01/image-20210722100947292.png)
+![image-20210722100947292](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722100947292.png)
 
 页面会给指定的酒店添加**广告**标记。
 
@@ -3827,13 +3826,13 @@ POST /hotel/_update/2056105938
 
 function_score查询结构如下：
 
-![image-20210721191544750](分布式搜索引擎01/image-20210721191544750.png)
+![image-20210721191544750](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210721191544750.png)
 
 
 
 对应的JavaAPI如下：
 
-![image-20210722102850818](分布式搜索引擎01/image-20210722102850818.png)
+![image-20210722102850818](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/分布式搜索引擎01/image-20210722102850818.png)
 
 
 
@@ -3978,7 +3977,7 @@ GET /hotel/_search
 
 
 
-![image-20210723171948228](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723171948228.png)
+![image-20210723171948228](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723171948228.png)
 
 
 
@@ -4042,7 +4041,7 @@ GET /hotel/_search
 
 这次，聚合得到的品牌明显变少了：
 
-![image-20210723172404836](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723172404836.png)
+![image-20210723172404836](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723172404836.png)
 
 
 
@@ -4112,7 +4111,7 @@ GET /hotel/_search
 
 
 
-![image-20210723172917636](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723172917636.png)
+![image-20210723172917636](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723172917636.png)
 
 
 
@@ -4146,13 +4145,13 @@ aggs代表聚合，与query同级，此时query的作用是？
 
 聚合条件的语法：
 
-![image-20210723173057733](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723173057733.png)
+![image-20210723173057733](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723173057733.png)
 
 
 
 聚合的结果也与查询结果不同，API也比较特殊。不过同样是JSON逐层解析：
 
-![image-20210723173215728](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723173215728.png)
+![image-20210723173215728](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723173215728.png)
 
 ```java
 @Test
@@ -4189,7 +4188,7 @@ aggs代表聚合，与query同级，此时query的作用是？
 
 需求：搜索页面的品牌、城市等信息不应该是在页面写死，而是通过聚合索引库中的酒店数据得来的：
 
-![image-20210723192605566](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723192605566.png)
+![image-20210723192605566](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723192605566.png)
 
 
 
@@ -4215,7 +4214,7 @@ aggs代表聚合，与query同级，此时query的作用是？
 
 查看浏览器可以发现，前端其实已经发出了这样的一个请求：
 
-![image-20210723193730799](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723193730799.png)
+![image-20210723193730799](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723193730799.png)
 
 请求**参数与搜索文档的参数完全一致**。
 
@@ -4223,7 +4222,7 @@ aggs代表聚合，与query同级，此时query的作用是？
 
 返回值类型就是页面要展示的最终结果：
 
-![image-20210723203915982](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723203915982.png)
+![image-20210723203915982](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723203915982.png)
 
 结果是一个Map结构：
 
@@ -4342,7 +4341,7 @@ private List<String> getAggByName(Aggregations aggregations, String aggName) {
 
 当用户在搜索框输入字符时，我们应该提示出与该字符有关的搜索项，如图：
 
-![image-20210723204936367](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723204936367.png)
+![image-20210723204936367](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723204936367.png)
 
 这种根据用户输入的字母，提示完整词条的功能，就是自动补全了。
 
@@ -4358,7 +4357,7 @@ private List<String> getAggByName(Aggregations aggregations, String aggName) {
 
 要实现根据字母做补全，就必须对文档按照拼音分词。在GitHub上恰好有elasticsearch的拼音分词插件。地址：https://github.com/medcl/elasticsearch-analysis-pinyin
 
-![image-20210723205932746](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723205932746.png)
+![image-20210723205932746](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723205932746.png)
 
 
 
@@ -4366,7 +4365,7 @@ private List<String> getAggByName(Aggregations aggregations, String aggName) {
 
 课前资料中也提供了拼音分词器的安装包：
 
-![image-20210723205722303](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723205722303.png) 
+![image-20210723205722303](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723205722303.png) 
 
 
 
@@ -4402,7 +4401,7 @@ POST /_analyze
 
 结果：
 
-![image-20210723210126506](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723210126506.png) 
+![image-20210723210126506](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723210126506.png) 
 
 
 
@@ -4424,7 +4423,7 @@ elasticsearch中分词器（analyzer）的组成包含三部分：
 
 文档分词时会依次由这三部分来处理文档：
 
-   ![image-20210723210427878](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723210427878.png)
+   ![image-20210723210427878](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723210427878.png)
 
 声明自定义分词器的语法如下：
 
@@ -4502,7 +4501,7 @@ PUT /test
 
 测试：
 
-![image-20210723211829150](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723211829150.png)
+![image-20210723211829150](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723211829150.png)
 
 
 
@@ -4820,7 +4819,7 @@ GET /hotel/_search
 
 
 
-![image-20210723213546183](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723213546183.png)
+![image-20210723213546183](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723213546183.png)
 
 测试自动补全
 
@@ -4848,7 +4847,7 @@ GET /hotel/_search
 
 之前我们学习了自动补全查询的DSL，而没有学习对应的JavaAPI，这里给出一个示例：
 
-![image-20210723213759922](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723213759922.png)
+![image-20210723213759922](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723213759922.png)
 
 
 
@@ -4856,7 +4855,7 @@ GET /hotel/_search
 
 而自动补全的结果也比较特殊，解析的代码如下：
 
-![image-20210723213917524](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723213917524.png)
+![image-20210723213917524](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723213917524.png)
 
 ```java
 @Test
@@ -4896,7 +4895,7 @@ void testSuggest() throws IOException {
 
 查看前端页面，可以发现当我们在输入框键入时，前端会发起ajax请求：
 
-![image-20210723214021062](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723214021062.png)
+![image-20210723214021062](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723214021062.png)
 
 返回值是补全词条的集合，类型为`List<String>`
 
@@ -4968,7 +4967,7 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 
 
 
-![image-20210723214758392](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723214758392.png)
+![image-20210723214758392](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723214758392.png)
 
 
 
@@ -4988,7 +4987,7 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 
 方案一：同步调用
 
-![image-20210723214931869](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723214931869.png)
+![image-20210723214931869](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723214931869.png)
 
 基本步骤如下：
 
@@ -5001,7 +5000,7 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 
 方案二：异步通知
 
-![image-20210723215140735](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723215140735.png)
+![image-20210723215140735](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723215140735.png)
 
 
 
@@ -5018,7 +5017,7 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 
 方案三：监听binlog
 
-![image-20210723215518541](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723215518541.png)
+![image-20210723215518541](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723215518541.png)
 
 流程如下：
 
@@ -5079,17 +5078,17 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 
 导入课前资料提供的hotel-admin项目：
 
-![image-20210723220237930](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723220237930.png)
+![image-20210723220237930](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723220237930.png)
 
 运行后，访问 http://localhost:8099
 
-![image-20210723220354464](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723220354464.png)
+![image-20210723220354464](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723220354464.png)
 
 
 
 其中包含了酒店的CRUD功能：
 
-![image-20210723220511090](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723220511090.png)
+![image-20210723220511090](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723220511090.png)
 
 
 
@@ -5097,7 +5096,7 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 
 MQ结构如图：
 
-![image-20210723215850307](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723215850307.png)
+![image-20210723215850307](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723215850307.png)
 
 
 
@@ -5212,7 +5211,7 @@ public class MqConfig {
 
 在hotel-admin中的增、删、改业务中分别发送MQ消息：
 
-![image-20210723221843816](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723221843816.png)
+![image-20210723221843816](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723221843816.png)
 
 ```java
 @RestController
@@ -5388,7 +5387,7 @@ public class HotelListener {
 
   解决问题：数据量太大，单点存储量有限的问题。
 
-  ![image-20200104124440086](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20200104124440086-5602723.png)
+  ![image-20200104124440086](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20200104124440086-5602723.png)
 
   > 此处，我们把数据分成3片：shard0、shard1、shard2
 
@@ -5407,7 +5406,7 @@ public class HotelListener {
 
 这样可以大大减少所需要的服务节点数量，如图，我们以3分片，每个分片备份一份为例：
 
-![image-20200104124551912](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20200104124551912.png)
+![image-20200104124551912](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20200104124551912.png)
 
 现在，每个分片都有1个备份，存储在3个节点：
 
@@ -5423,11 +5422,11 @@ public class HotelListener {
 
 参考课前资料的文档：
 
-![image-20210723222732427](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723222732427.png) 
+![image-20210723222732427](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723222732427.png) 
 
 其中的第四章节：
 
-![image-20210723222812619](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723222812619.png) 
+![image-20210723222812619](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723222812619.png) 
 
 
 
@@ -5441,7 +5440,7 @@ public class HotelListener {
 
 elasticsearch中集群节点有不同的职责划分：
 
-![image-20210723223008967](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723223008967.png)
+![image-20210723223008967](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723223008967.png)
 
 
 
@@ -5459,7 +5458,7 @@ elasticsearch中集群节点有不同的职责划分：
 
 一个典型的es集群职责划分如图：
 
-![image-20210723223629142](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723223629142.png)
+![image-20210723223629142](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723223629142.png)
 
 
 
@@ -5469,17 +5468,17 @@ elasticsearch中集群节点有不同的职责划分：
 
 例如一个集群中，主节点与其它节点失联：
 
-![image-20210723223804995](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723223804995.png)
+![image-20210723223804995](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723223804995.png)
 
 此时，node2和node3认为node1宕机，就会重新选主：
 
-![image-20210723223845754](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723223845754.png)
+![image-20210723223845754](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723223845754.png)
 
 当node3当选后，集群继续对外提供服务，node2和node3自成集群，node1自成集群，两个集群数据不同步，出现数据差异。
 
 当网络恢复后，因为集群中有两个master节点，集群状态的不一致，出现脑裂的情况：
 
-![image-20210723224000555](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723224000555.png)
+![image-20210723224000555](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723224000555.png)
 
 
 
@@ -5524,15 +5523,15 @@ coordinator节点的作用是什么？
 
 插入三条数据：
 
-![image-20210723225006058](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225006058.png)
+![image-20210723225006058](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225006058.png)
 
 
 
-![image-20210723225034637](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225034637.png)
+![image-20210723225034637](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225034637.png)
 
 
 
-![image-20210723225112029](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225112029.png)
+![image-20210723225112029](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225112029.png)
 
 
 
@@ -5540,11 +5539,11 @@ coordinator节点的作用是什么？
 
 **加上explain字段**
 
-![image-20210723225227928](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225227928.png)
+![image-20210723225227928](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225227928.png)
 
 结果：
 
-![image-20210723225342120](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225342120.png)
+![image-20210723225342120](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225342120.png)
 
 
 
@@ -5554,7 +5553,7 @@ coordinator节点的作用是什么？
 
 elasticsearch会通过**hash算法来计算文档应该存储到哪个分片**：
 
-![image-20210723224354904](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723224354904.png)
+![image-20210723224354904](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723224354904.png)
 
 
 
@@ -5569,7 +5568,7 @@ elasticsearch会通过**hash算法来计算文档应该存储到哪个分片**�
 
 新增文档的流程如下：
 
-![image-20210723225436084](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225436084.png)
+![image-20210723225436084](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225436084.png)
 
 
 
@@ -5594,13 +5593,13 @@ elasticsearch的查询分成两个阶段：
 
 
 
-![image-20210723225809848](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225809848.png)
+![image-20210723225809848](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225809848.png)
 
 
 
 
 
-![image-20210913173614093](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210913173614093.png)
+![image-20210913173614093](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210913173614093.png)
 
 
 
@@ -5612,7 +5611,7 @@ elasticsearch的查询分成两个阶段：
 
 1）例如一个集群结构如图：
 
-![image-20210723225945963](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225945963.png)
+![image-20210723225945963](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723225945963.png)
 
 现在，node1是主节点，其它两个节点是从节点。
 
@@ -5620,19 +5619,19 @@ elasticsearch的查询分成两个阶段：
 
 2）突然，node1发生了故障：
 
-![image-20210723230020574](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723230020574.png)
+![image-20210723230020574](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723230020574.png)
 
 
 
 宕机后的第一件事，需要重新选主，例如选中了node2：
 
-![image-20210723230055974](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723230055974.png)
+![image-20210723230055974](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723230055974.png)
 
 
 
 node2成为主节点后，会检测集群监控状态，发现：shard-1、shard-0没有副本节点。因此需要将node1上的数据迁移到node2、node3：
 
-![image-20210723230216642](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723230216642.png)
+![image-20210723230216642](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723230216642.png)
 
 模拟故障
 
@@ -5650,5 +5649,5 @@ node2成为主节点后，会检测集群监控状态，发现：shard-1、shard
 
 会恢复
 
-![image-20210913174330660](./https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210913174330660.png)
+![image-20210913174330660](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210913174330660.png)
 
