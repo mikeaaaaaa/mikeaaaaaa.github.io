@@ -492,7 +492,7 @@ PUT /heima
 }
 ```
 
-在[Dev Tools](http://192.168.194.128:5601/app/dev_tools#/)运行可得到
+在Dev Tools运行可得到
 
 ```json
 {
