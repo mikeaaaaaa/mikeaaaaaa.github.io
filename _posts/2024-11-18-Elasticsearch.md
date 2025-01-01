@@ -12,15 +12,9 @@ categories: Elasticsearch
 
 # 分布式搜索引擎elasticsearch
 
--- elasticsearch基础
-
-
-
 ## 1.初识elasticsearch
 
-### 1.1.了解ES
-
-## 
+### 1.1.了解ESs
 
 #### 1.1.1.elasticsearch的作用
 
@@ -4736,6 +4730,8 @@ HotelDoc中要添加一个字段，用来做自动补全，内容可以是酒店
 
 代码如下：
 
+我们新建了一个专门用于自动补全的字段 `suggestion`：这个字段设置为list类型，值来自于其他管理员想要给用户自动补全的信息
+
 ```java
 package cn.itcast.hotel.pojo;
 
@@ -4839,7 +4835,7 @@ GET /hotel/_search
 
 #### 2.4.4.自动补全查询的JavaAPI
 
-之前我们学习了自动补全查询的DSL，而没有学习对应的JavaAPI，这里给出一个示例：
+之前我们学习了自动补全查询的DSL，而没有学习对应的JavaAPI，这里给出一个示例，如下图我们可以看到，和普通查询一样，都是准备一个`SearchRequest`，但是往里塞的东西，注意，不太一样了；自动补全本质上还是通过前缀来查询，因此有一个 `prefix`
 
 ![image-20210723213759922](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723213759922.png)
 
@@ -4959,6 +4955,8 @@ public List<String> getSuggestions(String prefix) {
 
 elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生改变时，elasticsearch也必须跟着改变，这个就是elasticsearch与mysql之间的**数据同步**。
 
+单体业务的数据同步其实非常简答，但是在微服务架构中就比较难搞了
+
 
 
 ![image-20210723214758392](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723214758392.png)
@@ -4966,14 +4964,6 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 
 
 
-
-### 3.1.思路分析
-
-常见的数据同步方案有三种：
-
-- 同步调用
-- 异步通知
-- 监听binlog
 
 
 
@@ -4988,7 +4978,12 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 - hotel-demo对外提供接口，用来修改elasticsearch中的数据
 - 酒店管理服务在完成数据库操作后，直接调用hotel-demo提供的接口，
 
+三个步骤依次执行，`业务耦合`！！！！！业务耦合也带来了其他的问题：
 
++ 时间花销增大
++ 任意一个环节遭殃，业务全玩完
+
+有点就是非常简单，
 
 #### 3.1.2.异步通知
 
@@ -5003,7 +4998,7 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 - hotel-admin对mysql数据库数据完成增、删、改后，发送MQ消息
 - hotel-demo监听MQ，接收到消息后完成elasticsearch数据修改
 
-
+我只需要发一条消息，至于谁监听这个消息，监听到了做什么，我都不管不着，解决了上述**功能耦合**带来的问题，但是同时增加了业务的复杂度，并且依赖于MQ中间件的可靠性
 
 
 
@@ -5019,7 +5014,10 @@ elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生
 - mysql完成增、删、改操作都会记录在binlog中
 - hotel-demo基于`canal`监听binlog变化，实时更新elasticsearch中的内容
 
+利用`canal`这样类似的中间件来监听MySql默认关闭的Binlog，一旦发生变化即通知es服务来更新；
 
++ 开启binlog，`mysql`的压力增大了
++ 这种`耦合方式是最低`的
 
 #### 3.1.4.选择
 
@@ -5222,6 +5220,8 @@ public class MqConfig {
 #### 3.2.4.发送MQ消息
 
 在hotel-admin中的增、删、改业务中分别发送MQ消息：
+
+注意：由于MQ是基于内存的，因从我们往其中存储的数据尽量要小，在本项目中，我们选择仅放置`ID`
 
 ![image-20210723221843816](https://raw.githubusercontent.com/limingzhong61/LearningNotes/5f57182e77161f80d8cbef343acc3756d5f0114d/Java/SpringCloud/Elasticsearch/Elasticsearch/image-20210723221843816.png)
 
