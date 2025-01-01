@@ -5281,8 +5281,6 @@ public class HotelController {
 
 ```
 
-
-
 #### 3.2.5.接收MQ消息
 
 hotel-demo接收到MQ消息要做的事情包括：
